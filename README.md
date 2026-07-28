@@ -1,123 +1,120 @@
-# Nuxt + Passport.js — стартовый проект
+# Nuxt + Passport.js — Starter Project
 
-Полноценный скелет: логин/регистрация, восстановление пароля, OAuth (Google готов, Meta/X — заглушки),
-Dashboard, i18n (en/uk), light/dark тема.
+A complete project skeleton featuring login/registration, password recovery, OAuth (Google fully implemented, Meta/X placeholders), a dashboard, i18n (en/uk), and light/dark theme support.
 
-## Технологии
+## Technologies
 
-- **Nuxt 3** (Vue 3, Nitro-сервер) — фронтенд и бэкенд в одном проекте
-- **PostgreSQL + Prisma** — база данных
-- **Passport.js** — локальная стратегия (email/пароль)
-- **Ручной OAuth2 Authorization Code Flow** — Google (Meta/X по аналогии)
-- **@nuxtjs/i18n** — английский и украинский
-- **zxcvbn** — индикатор сложности пароля
-- **nodemailer** — отправка письма при восстановлении пароля
+- **Nuxt 3** (Vue 3, Nitro server) — frontend and backend in a single project
+- **PostgreSQL + Prisma** — database
+- **Passport.js** — local authentication strategy (email/password)
+- **Manual OAuth2 Authorization Code Flow** — Google (Meta/X follow the same pattern)
+- **@nuxtjs/i18n** — English and Ukrainian localization
+- **zxcvbn** — password strength indicator
+- **nodemailer** — sends password recovery emails
 
-## Важные архитектурные решения (и почему)
+## Key Architectural Decisions (and Why)
 
-### 1. Сессии — не JWT, а классические server-side
+### 1. Sessions use classic server-side storage instead of JWT
 
-При логине/регистрации сервер создаёт запись в таблице `sessions` (Prisma) и кладёт **только id
-этой записи** в httpOnly cookie. Сам объект пользователя на клиенте никогда не хранится в виде
-токена — это и есть "классическая" сессия, в отличие от JWT, где данные лежат в самом токене.
+When a user logs in or registers, the server creates a record in the `sessions` table (via Prisma) and stores **only the session ID** in an httpOnly cookie. The user object is never stored on the client as a token. This is the traditional session-based approach, unlike JWT where user data is embedded inside the token itself.
 
-Реализовано вручную в `server/utils/session.ts`, потому что пакета `express-session` в Nitro нет
-(Nitro — не Express), а его логика здесь тривиальна: создать/прочитать/удалить строку в БД + cookie.
+This is implemented manually in `server/utils/session.ts` because Nitro does not support `express-session` (Nitro is not Express). The required logic is straightforward: create, retrieve, and delete a database record, plus manage the cookie.
 
-### 2. Passport.js используется по-настоящему, но только для local-стратегии
+### 2. Passport.js is used properly, but only for the local strategy
 
-`server/utils/passport.ts` — это самый obычный `passport.use(new LocalStrategy(...))`. Вызывается
-через `passport.authenticate('local', { session: false }, callback)` — это официально
-поддерживаемый Passport-паттерн, который **не трогает `req.session`/`req.res`**, если передан
-кастомный callback. Поэтому его можно безопасно дёрнуть из Nitro-хендлера, не оборачивая в Express.
+`server/utils/passport.ts` contains a standard `passport.use(new LocalStrategy(...))` configuration. Authentication is performed via:
 
-### 3. OAuth (Google/Meta/X) — вручную, а не через passport-google-oauth20 и т.п.
+```ts
+passport.authenticate('local', { session: false }, callback)
+```
 
-OAuth2-стратегии Passport по умолчанию рассчитывают на `req.session` (для CSRF `state`) и `req.res`
-— в Nitro этого нет и городить шim для этого хрупко. Вместо этого в `server/utils/oauth.ts` — обычный
-3-шаговый Authorization Code Flow (редирект → обмен code на token → получение профиля), а `state`
-хранится в отдельной короткоживущей httpOnly cookie через нативные хелперы h3. Google полностью
-реализован и работает; Meta и X добавляются по идентичной схеме — см. комментарий в конце файла.
+This is the officially supported Passport pattern and **does not rely on `req.session` or `req.res`** when a custom callback is provided. As a result, it can be safely used inside Nitro request handlers without wrapping Express.
 
-### 4. Восстановление пароля — как и просили, письмо с новым паролем
+### 3. OAuth (Google/Meta/X) is implemented manually instead of using `passport-google-oauth20`
 
-`POST /api/auth/forgot-password` генерирует случайный пароль, сохраняет его хэш и отправляет письмо
-через `nodemailer`. Если хотите обсудить более безопасную альтернативу (ссылка на смену пароля
-с одноразовым токеном вместо пароля в теле письма) — это меняется в одном месте, дайте знать.
+Passport OAuth strategies generally expect `req.session` (for CSRF `state`) and `req.res`, neither of which exists in Nitro. Building compatibility layers for this is unnecessarily fragile.
 
-## Структура проекта
+Instead, `server/utils/oauth.ts` implements a standard three-step Authorization Code Flow (redirect → exchange authorization code for an access token → fetch user profile). The `state` parameter is stored in a short-lived httpOnly cookie using h3's native helpers.
+
+Google is fully implemented and functional. Meta and X can be added by following the exact same pattern—see the comments at the end of the file.
+
+### 4. Password recovery sends a newly generated password
+
+`POST /api/auth/forgot-password` generates a random password, stores its hash, and sends the new password via email using `nodemailer`.
+
+If you prefer a more secure approach (sending a one-time password reset link instead of emailing a password), it can be changed in a single place.
+
+## Project Structure
 
 ```
 server/
   api/auth/
-    register.post.ts        POST  /api/auth/register
-    login.post.ts            POST  /api/auth/login
-    logout.post.ts           POST  /api/auth/logout
-    me.get.ts                 GET  /api/auth/me
-    forgot-password.post.ts  POST  /api/auth/forgot-password
-    google.get.ts              GET /api/auth/google           (редирект на Google)
-    google/callback.get.ts     GET /api/auth/google/callback
+    register.post.ts         POST /api/auth/register
+    login.post.ts            POST /api/auth/login
+    logout.post.ts           POST /api/auth/logout
+    me.get.ts                GET  /api/auth/me
+    forgot-password.post.ts  POST /api/auth/forgot-password
+    google.get.ts            GET  /api/auth/google            (redirects to Google)
+    google/callback.get.ts   GET  /api/auth/google/callback
   utils/
-    prisma.ts        singleton Prisma-клиента
-    session.ts        создание/чтение/удаление сессий, requireUser()
-    password.ts       хэш пароля, генерация временного пароля
-    passport.ts       local-стратегия Passport
-    oauth.ts           ручной OAuth2 flow, Google + шаблон для Meta/X
-    mailer.ts          отправка письма (или лог в консоль, если SMTP не настроен)
+    prisma.ts        Prisma Client singleton
+    session.ts       Session creation, retrieval, deletion, requireUser()
+    password.ts      Password hashing and temporary password generation
+    passport.ts      Passport local strategy
+    oauth.ts         Manual OAuth2 flow, Google + template for Meta/X
+    mailer.ts        Sends emails (or logs them to the console if SMTP is not configured)
 
 pages/
-  index.vue            логин/регистрация (переключаются без перехода по URL)
+  index.vue            Login/registration (switches without changing the URL)
   forgot-password.vue
   about.vue
   privacy.vue
-  dashboard.vue        только для авторизованных
+  dashboard.vue        Accessible only to authenticated users
 
 components/
   LoginForm.vue / RegisterForm.vue / PasswordStrengthMeter.vue
   LangSwitcher.vue / ThemeSwitcher.vue
 
 composables/
-  useAuth.ts     user state + login/register/logout/forgotPassword
-  useTheme.ts    light/dark, хранится в cookie
+  useAuth.ts     User state + login/register/logout/forgotPassword
+  useTheme.ts    Light/dark theme stored in a cookie
 
 middleware/
-  auth.global.ts  защищает /dashboard, уводит авторизованных с "/"
+  auth.global.ts  Protects /dashboard and redirects authenticated users away from "/"
 
 prisma/schema.prisma   User / Session / OAuthAccount
 i18n/locales/{en,uk}.json
 ```
 
-## Запуск локально
+## Running Locally
 
 ```bash
-# 1. Зависимости
+# 1. Install dependencies
 npm install
 
-# 2. Переменные окружения
+# 2. Environment variables
 cp .env.example .env
-# заполните DATABASE_URL, SMTP_*, GOOGLE_CLIENT_ID/SECRET
+# Fill in DATABASE_URL, SMTP_*, and GOOGLE_CLIENT_ID/SECRET
 
-# 3. База данных
+# 3. Initialize the database
 npx prisma migrate dev --name init
 
-# 4. Запуск
+# 4. Start the development server
 npm run dev
 ```
 
-Без настроенного SMTP письма восстановления пароля просто печатаются в консоль сервера —
-удобно для разработки.
+If SMTP is not configured, password recovery emails are simply printed to the server console, which is convenient during development.
 
-## Настройка Google OAuth
+## Configuring Google OAuth
 
-1. Google Cloud Console → APIs & Services → Credentials → OAuth Client ID (Web application)
-2. Authorized redirect URI: `http://localhost:3000/api/auth/google/callback`
-3. `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` в `.env`
+1. Google Cloud Console → APIs & Services → Credentials → OAuth Client ID (Web Application)
+2. Authorized Redirect URI: `http://localhost:3000/api/auth/google/callback`
+3. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in your `.env` file.
 
-## Что стоит добавить перед продакшеном
+## Recommended Additions Before Production
 
-- Рейт-лимит на `/api/auth/login` и `/api/auth/forgot-password` (например, `unstorage` + счётчик по IP)
-- Периодическую очистку истёкших строк в таблице `sessions` (cron / Prisma `deleteMany` по `expiresAt`)
-- Подтверждение e-mail при регистрации
-- Meta и X стратегии (шаблон уже в `server/utils/oauth.ts`)
-- `secure: true` для cookie уже включается автоматически в `NODE_ENV=production`, но убедитесь, что
-  сайт отдаётся по HTTPS
+- Rate limiting for `/api/auth/login` and `/api/auth/forgot-password` (for example, using `unstorage` with an IP-based counter)
+- Periodic cleanup of expired records in the `sessions` table (cron job or Prisma `deleteMany` based on `expiresAt`)
+- Email verification during registration
+- Meta and X OAuth providers (the template is already available in `server/utils/oauth.ts`)
+- `secure: true` for cookies is already enabled automatically when `NODE_ENV=production`, but make sure the application is served over HTTPS.

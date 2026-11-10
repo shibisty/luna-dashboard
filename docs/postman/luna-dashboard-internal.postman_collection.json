@@ -1,0 +1,295 @@
+{
+  "info": {
+    "_postman_id": "8d5bc21e-3dba-5985-84ad-0637b4fc1e5f",
+    "name": "Luna Dashboard internal API",
+    "description": "The dashboard's internal API (docs/openapi.yaml): what luna-auth and luna-pages ask about API keys. Set `serviceToken` to one of the dashboard's LUNA_SERVICE_TOKENS and `apiKey` to a key created in the dashboard; the collection sends its SHA-256, as luna-keys does.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{serviceToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "serviceToken",
+      "value": ""
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    },
+    {
+      "key": "keyHash",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/healthz",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "healthz"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Introspect the key",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// the hash of apiKey, as luna-keys sends it",
+              "const key = pm.variables.get(\"apiKey\") || \"\";",
+              "pm.collectionVariables.set(\"keyHash\", CryptoJS.SHA256(key).toString(CryptoJS.enc.Hex));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"active key\", () => { pm.expect(body.active).to.eql(true); pm.expect(body.app_id).to.be.a(\"string\"); pm.expect(body.scopes).to.be.an(\"array\"); });",
+              "pm.test(\"no-store\", () => pm.expect(pm.response.headers.get(\"Cache-Control\")).to.eql(\"no-store\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hash\": \"{{keyHash}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/internal/v1/keys/introspect",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "internal",
+            "v1",
+            "keys",
+            "introspect"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Introspect an unknown key",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// the hash of apiKey, as luna-keys sends it",
+              "const key = pm.variables.get(\"apiKey\") || \"\";",
+              "pm.collectionVariables.set(\"keyHash\", CryptoJS.SHA256(key).toString(CryptoJS.enc.Hex));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"inactive\", () => pm.expect(pm.response.json().active).to.eql(false));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hash\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/internal/v1/keys/introspect",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "internal",
+            "v1",
+            "keys",
+            "introspect"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Without a service token",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// the hash of apiKey, as luna-keys sends it",
+              "const key = pm.variables.get(\"apiKey\") || \"\";",
+              "pm.collectionVariables.set(\"keyHash\", CryptoJS.SHA256(key).toString(CryptoJS.enc.Hex));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hash\": \"{{keyHash}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/internal/v1/keys/introspect",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "internal",
+            "v1",
+            "keys",
+            "introspect"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "A malformed hash",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// the hash of apiKey, as luna-keys sends it",
+              "const key = pm.variables.get(\"apiKey\") || \"\";",
+              "pm.collectionVariables.set(\"keyHash\", CryptoJS.SHA256(key).toString(CryptoJS.enc.Hex));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hash\": \"nope\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/internal/v1/keys/introspect",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "internal",
+            "v1",
+            "keys",
+            "introspect"
+          ]
+        }
+      }
+    }
+  ]
+}

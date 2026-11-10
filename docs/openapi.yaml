@@ -1,0 +1,148 @@
+openapi: 3.1.0
+info:
+  title: Luna Dashboard internal API
+  version: 0.1.0
+  summary: What the other Luna services ask the dashboard about API keys.
+  description: |
+    The dashboard is the only service that knows API keys. luna-auth and luna-pages ask it about
+    every key they receive, with luna-keys' client, which sends the key's SHA-256 (never the key)
+    and keeps the answer for 60 seconds (unknown keys 10 seconds).
+
+    These routes are internal: nginx never routes `/internal/`, and in Kubernetes a
+    NetworkPolicy lets only the Luna services reach them. Callers authenticate with a service
+    token, one of the dashboard's `LUNA_SERVICE_TOKENS`.
+
+    The developer console itself (`/`, `/login`, `/apps`, …) is HTML pages with forms, not part of
+    this API.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: http://localhost:8080
+    description: local (gtr dev)
+  - url: http://luna-dashboard:8080
+    description: inside the Docker or Kubernetes network
+tags:
+  - name: keys
+    description: API key introspection for the Luna services.
+  - name: service
+    description: Liveness.
+
+paths:
+  /healthz:
+    get:
+      tags: [service]
+      summary: Liveness
+      operationId: health
+      security: []
+      responses:
+        "200":
+          description: The service is up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: ok }
+                  app: { type: string, example: luna-dashboard }
+                required: [status]
+
+  /internal/v1/keys/introspect:
+    post:
+      tags: [keys]
+      summary: Introspect an API key
+      description: |
+        What the dashboard knows about the key with this hash (RFC 7662 style). An unknown or
+        revoked key is `200` with `active: false`. A successful check records the key's last use
+        (at most once a minute).
+      operationId: introspectKey
+      security:
+        - serviceToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hash:
+                  type: string
+                  pattern: "^[0-9a-fA-F]{64}$"
+                  description: The hex SHA-256 of the key as the client sent it.
+              required: [hash]
+      responses:
+        "200":
+          description: The verdict.
+          headers:
+            Cache-Control:
+              schema: { type: string, const: no-store }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Introspection" }
+        "400":
+          description: 'The body is not `{"hash": "<64 hex characters>"}`.'
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401":
+          description: No or a wrong service token.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "405":
+          description: Only POST.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500":
+          description: The key could not be looked up.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+components:
+  securitySchemes:
+    serviceToken:
+      type: http
+      scheme: bearer
+      description: A service token, one of the dashboard's `LUNA_SERVICE_TOKENS`.
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
+    Scope:
+      type: string
+      enum: [auth:login, auth:users.read, auth:users.write, pages:read, pages:write]
+    Introspection:
+      oneOf:
+        - type: object
+          description: A valid key.
+          properties:
+            active: { type: boolean, const: true }
+            key_id: { type: string, format: uuid }
+            app_id: { type: string, format: uuid }
+            app_name: { type: string, example: Shop }
+            kind: { type: string, enum: [server, browser] }
+            scopes:
+              type: array
+              items: { $ref: "#/components/schemas/Scope" }
+            origins:
+              type: array
+              description: Allowed `Origin` values (browser keys).
+              items: { type: string, example: "https://shop.example" }
+            ips:
+              type: array
+              description: Allowed client networks; absent means any.
+              items: { type: string, example: 203.0.113.0/24 }
+            password_reset_url:
+              type: string
+              format: uri
+              description: Where the application's password reset emails link to.
+          required: [active, key_id, app_id, kind, scopes]
+        - type: object
+          description: An unknown or revoked key.
+          properties:
+            active: { type: boolean, const: false }
+          required: [active]

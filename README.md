@@ -24,6 +24,21 @@ use (at most once a minute). Lists are stored as JSONB (`models.StringList`).
 | `GET /apps/{app}/keys/new`, `POST /apps/{app}/keys` | a new key; the secret page |
 | `POST /apps/{app}/keys/{key}/regenerate`, `.../revoke` | a new secret; revoke |
 
+## Internal API
+
+The other services call `POST /internal/v1/keys/introspect` (with a service token) and
+`GET /healthz`. nginx never routes `/internal/`.
+
+- **OpenAPI 3.1**: [`docs/openapi.yaml`](docs/openapi.yaml), served at `GET /internal/openapi.yaml`;
+  Swagger UI at `/internal/docs` with `API_DOCS=true`. A test keeps the document and the routes
+  in step.
+- **Postman**: [`docs/postman/luna-dashboard-internal.postman_collection.json`](docs/postman/luna-dashboard-internal.postman_collection.json)
+  with [`docs/postman/luna-dashboard-local.postman_environment.json`](docs/postman/luna-dashboard-local.postman_environment.json):
+  set `serviceToken` (one of `LUNA_SERVICE_TOKENS`) and `apiKey` (a key created here); the
+  collection sends the key's SHA-256, as luna-keys does.
+
+The developer console's pages are HTML forms, not an API.
+
 ## Run
 
 From the workspace root (`luna/`): `gtr install`. Then here:

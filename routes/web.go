@@ -17,6 +17,7 @@ func Web(app *fullstack.App, au *auth.Auth) {
 	home := controllers.Home{App: app}
 	login := controllers.Auth{App: app, Auth: au}
 	ap := controllers.Apps{App: app}
+	us := controllers.Users{App: app}
 	app.Router.Group("/", func(r *web.Router) {
 		r.Use(au.Web(), au.CSRF())
 		r.Get("/", home.Index).Name("home")
@@ -40,6 +41,15 @@ func Web(app *fullstack.App, au *auth.Auth) {
 			r.Post("/{app}/keys", ap.CreateKey)
 			r.Post("/{app}/keys/{key}/regenerate", ap.Regenerate)
 			r.Post("/{app}/keys/{key}/revoke", ap.Revoke)
+
+			// The application's users and its data about them (luna-auth).
+			r.Get("/{app}/users", us.Index).Name("apps.users")
+			r.Post("/{app}/users", us.Create)
+			r.Get("/{app}/users/{user}", us.Show).Name("apps.users.show")
+			r.Post("/{app}/users/{user}", us.Update)
+			r.Post("/{app}/users/{user}/delete", us.Delete)
+			r.Post("/{app}/users/{user}/data", us.SetData)
+			r.Post("/{app}/users/{user}/data/{key}/delete", us.DeleteData)
 		}, au.Require())
 	})
 }

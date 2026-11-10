@@ -114,7 +114,7 @@ components:
       required: [error]
     Scope:
       type: string
-      enum: [auth:login, auth:users.read, auth:users.write, pages:read, pages:write]
+      enum: [auth:login, auth:users.read, auth:users.write, auth:data.read, auth:data.write, pages:read, pages:write]
     Introspection:
       oneOf:
         - type: object

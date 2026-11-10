@@ -23,6 +23,13 @@ use (at most once a minute). Lists are stored as JSONB (`models.StringList`).
 | `GET /apps/{app}`, `POST /apps/{app}`, `POST /apps/{app}/delete` | keys and settings (name, password reset URL) |
 | `GET /apps/{app}/keys/new`, `POST /apps/{app}/keys` | a new key; the secret page |
 | `POST /apps/{app}/keys/{key}/regenerate`, `.../revoke` | a new secret; revoke |
+| `GET /apps/{app}/users`, `POST /apps/{app}/users` | the application's end users (search, pages), a new one |
+| `GET /apps/{app}/users/{user}`, `POST …/{user}`, `POST …/{user}/delete` | a user: account (email, username, verified, new password), delete |
+| `POST …/{user}/data`, `POST …/{user}/data/{key}/delete` | the application's data about the user: set a value, delete a key |
+
+The users pages call luna-auth's internal API (`app/authapi`, `LUNA_AUTH_URL` with
+`LUNA_AUTH_TOKEN`) after checking that the application is the developer's; without them the
+pages say that luna-auth is not connected.
 
 ## Internal API
 
@@ -53,6 +60,7 @@ go run . migrate         # in production; DB_MIGRATE=true does it at start local
 |---|---|
 | `DATABASE_DSN` | Postgres, e.g. `postgres://dashboard_user:…@postgres:5432/dashboard_db` |
 | `LUNA_SERVICE_TOKENS` | tokens of the services allowed to introspect keys, comma-separated |
+| `LUNA_AUTH_URL`, `LUNA_AUTH_TOKEN` | luna-auth's internal address and its `LUNA_DASHBOARD_TOKEN`, for the users pages |
 | `HTTP_TRUSTED_PROXIES` | nginx's network, so login throttling sees the client |
 | `AUTH_SESSION_TTL` | developers' session lifetime |
 

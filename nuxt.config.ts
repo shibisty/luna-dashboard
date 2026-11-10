@@ -1,9 +1,47 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-01-01',
   devtools: { enabled: true },
-  css: ['~/assets/css/main.css'],
 
-  modules: ['@nuxtjs/i18n'],
+  modules: ['@nuxtjs/i18n', 'vuetify-nuxt-module'],
+
+  vuetify: {
+    moduleOptions: {
+      ssrClientHints: {
+        reloadOnFirstRequest: false,
+        viewportSize: true,
+        prefersColorScheme: false,
+      },
+    },
+    vuetifyOptions: {
+      theme: {
+        defaultTheme: 'light',
+        themes: {
+          light: {
+            dark: false,
+            colors: {
+              primary: '#1B1F23',
+              secondary: '#5B5850',
+              background: '#F7F6F3',
+              surface: '#FFFFFF',
+              error: '#B3432B',
+              success: '#3F6B4F',
+            },
+          },
+          dark: {
+            dark: true,
+            colors: {
+              primary: '#E8E6DF',
+              secondary: '#9A9A92',
+              background: '#12151C',
+              surface: '#1B1F29',
+              error: '#E2624B',
+              success: '#7FB894',
+            },
+          },
+        },
+      },
+    },
+  },
 
   i18n: {
     locales: [

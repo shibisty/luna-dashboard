@@ -9,10 +9,13 @@
     "postinstall": "nuxt prepare",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "prod": "pm2 start ecosystem.config.cjs --env production",
+    "stop": "pm2 stop all"
   },
   "dependencies": {
-    "@nuxtjs/i18n": "^8.5.5",
+    "@mdi/font": "^7.4.47",
+    "@nuxtjs/i18n": "^9.0.0",
     "@prisma/client": "^5.20.0",
     "bcryptjs": "^2.4.3",
     "h3": "^1.13.0",
@@ -20,8 +23,12 @@
     "nuxt": "^3.13.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "pm2": "^7.0.3",
     "vue": "^3.5.10",
     "vue-router": "^4.4.5",
+    "vuedraggable": "^4.1.0",
+    "vuetify": "^4.1.5",
+    "vuetify-nuxt-module": "^1.0.0-rc.2",
     "zod": "^3.23.8",
     "zxcvbn": "^4.4.2"
   },

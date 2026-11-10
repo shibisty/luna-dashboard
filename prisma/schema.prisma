@@ -16,6 +16,7 @@ model User {
 
   sessions     Session[]
   oauthAccounts OAuthAccount[]
+  apiKeys ApiKey[]
 
   @@map("users")
 }
@@ -42,4 +43,22 @@ model OAuthAccount {
 
   @@unique([provider, providerUserId])
   @@map("oauth_accounts")
+}
+
+model ApiKey {
+  id             String    @id @default(uuid())
+  name           String
+  publicKey      String    @unique
+  privateKeyHash String
+  allowedDomains String[]  @default([])
+  allowedIps     String[]  @default([])
+  scopes         String[]  @default([])
+  lastUsedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
 }

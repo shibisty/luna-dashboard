@@ -3,33 +3,14 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="page">
-    <div class="card content-card">
-      <h1>{{ t('privacy.title') }}</h1>
-      <p>{{ t('privacy.body') }}</p>
-    </div>
-  </div>
+  <v-container class="py-12">
+    <v-row justify="center">
+      <v-col cols="12" md="8">
+        <v-card class="pa-8">
+          <h1 class="text-h5 mb-4">{{ t('privacy.title') }}</h1>
+          <p class="text-body-1 text-medium-emphasis">{{ t('privacy.body') }}</p>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
-
-<style scoped>
-.page {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  padding: 48px 24px;
-}
-
-.content-card {
-  max-width: 640px;
-  width: 100%;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.content-card p {
-  color: var(--ink-soft);
-  line-height: 1.6;
-}
-</style>

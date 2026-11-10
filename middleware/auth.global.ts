@@ -1,15 +1,18 @@
 export default defineNuxtRouteMiddleware(async (to) => {
   const { user, fetchMe } = useAuth()
 
-  // Подгружаем текущего пользователя один раз за навигацию на сервере/при первой загрузке
-  if (user.value === null) {
+  // На каждой навигации, где ещё не знаем пользователя — ждём ответ, не рендерим страницу раньше времени
+  if (user.value === null && !import.meta.server) {
+    await fetchMe()
+  } else if (import.meta.server) {
     await fetchMe()
   }
 
   const isAuthed = Boolean(user.value)
   const publicPaths = ['/', '/about', '/privacy', '/forgot-password']
+  const isDashboardRoute = to.path.startsWith('/dashboard')
 
-  if (to.path === '/dashboard' && !isAuthed) {
+  if (isDashboardRoute && !isAuthed) {
     return navigateTo('/')
   }
 
@@ -17,8 +20,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/dashboard')
   }
 
-  if (!publicPaths.includes(to.path) && to.path !== '/dashboard') {
-    // Неизвестные/будущие приватные страницы — по умолчанию считаем защищёнными
+  if (!publicPaths.includes(to.path) && !isDashboardRoute) {
     if (!isAuthed) return navigateTo('/')
   }
 })

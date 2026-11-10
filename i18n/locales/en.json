@@ -3,6 +3,8 @@
     "about": "About us",
     "privacy": "Privacy policy",
     "dashboard": "Dashboard",
+    "users": "Users",
+    "pages": "Pages",
     "logout": "Log out"
   },
   "auth": {
@@ -45,5 +47,60 @@
   },
   "common": {
     "loading": "Loading…"
+  },
+  "apiKeys": {
+    "title": "API keys",
+    "create": "Create key",
+    "name": "Name",
+    "domains": "Domains (comma-separated, optional)",
+    "ips": "IP addresses (comma-separated, optional)",
+    "scopes": "Scopes",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "regenerate": "Regenerate private key",
+    "noKeys": "No API keys yet.",
+    "noRestrictions": "No domain/IP restrictions",
+    "confirmDelete": "Delete this API key? This cannot be undone.",
+    "confirmRegenerate": "The old private key will stop working. Continue?",
+    "keyCreatedTitle": "Key created",
+    "keyCreatedWarning": "The private key is shown once and never stored in plain form — copy it now.",
+    "publicKey": "Public key",
+    "privateKey": "Private key",
+    "copy": "Copy",
+    "gotIt": "I've saved the keys"
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "End users registered across all your API keys",
+    "search": "Search by email",
+    "filterByKey": "Filter by API key",
+    "email": "Email",
+    "apiKey": "API key",
+    "scopes": "Scopes",
+    "registeredAt": "Registered",
+    "lastLoginAt": "Last login",
+    "status": "Status",
+    "statusValues": {
+      "active": "Active",
+      "blocked": "Blocked"
+    },
+    "block": "Block",
+    "unblock": "Unblock",
+    "noUsers": "No users found."
+  },
+  "pages": {
+    "title": "Pages",
+    "subtitle": "Drag rows to reorder or change nesting level",
+    "addRoot": "Add page",
+    "editPage": "Edit page",
+    "newPage": "New page",
+    "pageTitle": "Title",
+    "pageSlug": "Slug",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirmDelete": "Delete this page and all its sub-pages?",
+    "noPages": "No pages yet."
   }
 }

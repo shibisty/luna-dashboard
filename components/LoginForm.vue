@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const emit = defineEmits<{ switchToRegister: []; switchToForgot: [] }>()
-
 const { t } = useI18n()
 const { login, pending } = useAuth()
 
@@ -26,106 +25,33 @@ const providers = [
 </script>
 
 <template>
-  <form class="form" @submit.prevent="onSubmit">
-    <h1>{{ t('auth.loginTitle') }}</h1>
+  <v-form @submit.prevent="onSubmit">
+    <h1 class="text-h5 mb-4">{{ t('auth.loginTitle') }}</h1>
 
-    <div class="field">
-      <label for="login-email">{{ t('auth.email') }}</label>
-      <input id="login-email" v-model="email" type="email" required autocomplete="email" />
-    </div>
+    <v-text-field v-model="email" :label="t('auth.email')" type="email" required class="mb-2" />
+    <v-text-field v-model="password" :label="t('auth.password')" type="password" required class="mb-1" />
 
-    <div class="field">
-      <label for="login-password">{{ t('auth.password') }}</label>
-      <input id="login-password" v-model="password" type="password" required autocomplete="current-password" />
-    </div>
+    <v-btn variant="text" size="small" class="mb-2 px-0" @click="emit('switchToForgot')">
+      {{ t('auth.forgotPassword') }}
+    </v-btn>
 
-    <button type="button" class="link-btn" @click="emit('switchToForgot')">{{ t('auth.forgotPassword') }}</button>
+    <v-alert v-if="error" type="error" density="compact" class="mb-4">{{ error }}</v-alert>
 
-    <p v-if="error" class="error-text">{{ error }}</p>
+    <v-btn type="submit" color="primary" block :loading="pending" class="mb-4">{{ t('auth.signIn') }}</v-btn>
 
-    <button class="btn btn-primary btn-block" type="submit" :disabled="pending">
-      {{ t('auth.signIn') }}
-    </button>
+    <v-divider class="mb-4">
+      <span class="text-caption text-medium-emphasis px-2">{{ t('auth.orContinueWith') }}</span>
+    </v-divider>
 
-    <div class="divider mono">{{ t('auth.orContinueWith') }}</div>
-
-    <div class="providers">
-      <a v-for="p in providers.filter((x) => x.ready)" :key="p.id" class="btn btn-block" :href="`/api/auth/${p.id}`">
+    <div class="d-flex flex-column ga-2 mb-4">
+      <v-btn v-for="p in providers" :key="p.id" :href="p.ready ? `/api/auth/${p.id}` : undefined" :disabled="!p.ready" variant="outlined" block>
         {{ p.label }}
-      </a>
-      <button
-        v-for="p in providers.filter((x) => !x.ready)"
-        :key="p.id"
-        class="btn btn-block"
-        type="button"
-        disabled
-        title="Coming soon"
-      >
-        {{ p.label }}
-      </button>
+      </v-btn>
     </div>
 
-    <p class="switch-text">
+    <p class="text-center text-body-2">
       {{ t('auth.noAccount') }}
-      <button type="button" class="link-btn" @click="emit('switchToRegister')">{{ t('auth.signUp') }}</button>
+      <v-btn variant="text" size="small" @click="emit('switchToRegister')">{{ t('auth.signUp') }}</v-btn>
     </p>
-  </form>
+  </v-form>
 </template>
-
-<style scoped>
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.link-btn {
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0;
-  align-self: flex-start;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--line);
-}
-
-.providers {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.providers .btn {
-  text-align: center;
-  text-decoration: none;
-}
-
-.providers .btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.switch-text {
-  text-align: center;
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin: 0;
-}
-</style>

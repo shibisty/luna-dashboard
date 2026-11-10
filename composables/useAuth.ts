@@ -8,11 +8,10 @@ export const useAuth = () => {
   const pending = useState('auth-pending', () => false)
 
   async function fetchMe() {
-    try {
-      user.value = await $fetch<AuthUser>('/api/auth/me')
-    } catch {
-      user.value = null
-    }
+    const { data } = await useAsyncData('auth-user', () =>
+      $fetch<AuthUser>('/api/auth/me').catch(() => null)
+    )
+    user.value = data.value
   }
 
   async function login(email: string, password: string) {

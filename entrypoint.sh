@@ -1,14 +1,23 @@
 #!/bin/sh
-set -e
+set -eu
 
 echo "Installing dependencies..."
 npm install
 
+echo "Preparing..."
+npx nuxi prepare
+
+echo "Creating init.sql..."
+npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > init.sql
+
+echo "Creating migrations (if schema changed)..."
+npx prisma migrate deploy
+
 echo "Generating Prisma client..."
 npx prisma generate
 
-echo "Applying database migrations..."
-npx prisma migrate deploy
+echo "Building"
+exec npm run build
 
 echo "Starting Nuxt development server..."
-exec npm run dev -- --host 0.0.0.0 --port 3000
+exec npm run prod

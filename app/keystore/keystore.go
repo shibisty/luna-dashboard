@@ -1,6 +1,5 @@
-// Package keystore answers the other Luna services about API keys
-// (luna-keys' introspection protocol). Applications and keys arrive in
-// stage 4 of the plan; until then every key is unknown.
+// Package keystore configures the introspection endpoint that answers the
+// other Luna services about API keys (luna-keys' protocol).
 package keystore
 
 import (
@@ -10,6 +9,8 @@ import (
 	"fullstack"
 	"fullstack/env"
 	"luna-keys"
+
+	"luna-dashboard/app/apps"
 )
 
 // Config is the introspection endpoint's configuration.
@@ -37,9 +38,13 @@ func Load() (Config, error) {
 	return c, err
 }
 
-// Lookup finds a key by its hash.
+// Lookup finds an active key by its hash (apps.Service.Lookup).
 func Lookup(app *fullstack.App) keys.LookupFunc {
 	return func(ctx context.Context, hash string) (*keys.Key, error) {
-		return nil, keys.ErrUnknownKey // the api_keys table comes in stage 4
+		svc, err := fullstack.Make[*apps.Service](app)
+		if err != nil {
+			return nil, err
+		}
+		return svc.Lookup(ctx, hash)
 	}
 }

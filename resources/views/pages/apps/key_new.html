@@ -1,0 +1,37 @@
+{{define "title"}}New key · {{.Application.Name}} · {{.App}}{{end}}
+{{define "content"}}
+<p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a></p>
+<h1>New API key</h1>
+<form class="card" method="post" action="/apps/{{.Application.PublicID}}/keys">
+  {{.CSRFField}}
+  <label>Name <span class="muted">optional, e.g. "production backend"</span>
+    <input name="name" value="{{.Form.Name}}" maxlength="100">
+    {{with .Errors}}{{template "error" index . "name"}}{{end}}
+  </label>
+  <fieldset>
+    <legend>Kind</legend>
+    <label><input type="radio" name="kind" value="server" {{if eq .Form.Kind "server"}}checked{{end}}>
+      <span><strong>Server</strong> <span class="muted">secret; for your backend; any scope</span></span></label>
+    <label><input type="radio" name="kind" value="browser" {{if eq .Form.Kind "browser"}}checked{{end}}>
+      <span><strong>Browser</strong> <span class="muted">public; for web pages on the allowed origins; auth:login only</span></span></label>
+    {{with .Errors}}{{template "error" index . "kind"}}{{end}}
+  </fieldset>
+  <fieldset>
+    <legend>Scopes</legend>
+    {{range .Scopes}}
+    <label><input type="checkbox" name="scopes" value="{{.Scope}}" {{if .Checked}}checked{{end}}>
+      <span><code>{{.Scope}}</code> <span class="muted">{{.Description}}{{if not .Browser}} · server keys{{end}}</span></span></label>
+    {{end}}
+    {{with .Errors}}{{template "error" index . "scopes"}}{{end}}
+  </fieldset>
+  <label>Allowed origins <span class="muted">browser keys: one per line, e.g. https://app.example</span>
+    <textarea name="origins">{{.Form.Origins}}</textarea>
+    {{with .Errors}}{{template "error" index . "origins"}}{{end}}
+  </label>
+  <label>Allowed networks <span class="muted">optional: addresses or CIDRs, one per line; empty allows any</span>
+    <textarea name="ips">{{.Form.IPs}}</textarea>
+    {{with .Errors}}{{template "error" index . "ips"}}{{end}}
+  </label>
+  <button>Create key</button>
+</form>
+{{end}}

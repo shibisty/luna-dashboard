@@ -2,7 +2,7 @@
   <a href="/"><strong>{{.App}}</strong></a>
   <span class="spacer"></span>
   {{if .User}}
-    <a href="/dashboard">Dashboard</a>
+    <a href="/apps">Applications</a>
     <form method="post" action="/logout">{{.CSRFField}}<button>Log out</button></form>
   {{else}}
     <a href="/login">Log in</a>

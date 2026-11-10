@@ -58,7 +58,8 @@ func TestRegisterAndLogin(t *testing.T) {
 		AssertUnprocessable().AssertSee("at least 8 characters")
 	form := url.Values{"name": {"Ann"}, "email": {"Ann@Example.com"}, "password": {"secret-password"}, "password_confirmation": {"secret-password"}}
 	c.Post("/register", form).AssertRedirect("/dashboard")
-	c.Get("/dashboard").AssertOK().AssertSee("Hello, Ann (ann@example.com)")
+	c.Get("/dashboard").AssertRedirect("/apps")
+	c.Get("/apps").AssertOK().AssertSee("Applications", "No applications yet")
 	c.Post("/logout", nil).AssertRedirect("/")
 	c.Get("/dashboard").AssertRedirect()
 

@@ -9,8 +9,20 @@ fullstack`) on Postgres: pages in `resources/views`, routes in `routes/`, handle
 `app/http/controllers`, migrations in `database/migrations`. Developers' sessions are in the
 database (`passport_sessions`, passport-session-sql).
 
-State: stage 2 of the migration plan — sign-up, login and sessions work; the introspection
-endpoint answers, every key is unknown until applications and keys arrive (stage 4).
+State: stage 4 of the migration plan. Developers sign up and log in (sessions in the database),
+create applications (`/apps`) and their keys: server keys (`sk_live_…`, any scope, optional
+network allow-list) and browser keys (`pk_live_…`, allowed origins, `auth:login` only). A key's
+secret is shown once (`Cache-Control: no-store`); afterwards only its hint. Keys can get a new
+secret or be revoked; services notice within their cache time (60 s). The introspection endpoint
+answers with the key's application, kind, scopes, origins and networks and records the key's last
+use (at most once a minute). Lists are stored as JSONB (`models.StringList`).
+
+| Page | |
+|---|---|
+| `GET /apps`, `POST /apps` | the developer's applications, a new one |
+| `GET /apps/{app}`, `POST /apps/{app}`, `POST /apps/{app}/delete` | keys and settings (name, password reset URL) |
+| `GET /apps/{app}/keys/new`, `POST /apps/{app}/keys` | a new key; the secret page |
+| `POST /apps/{app}/keys/{key}/regenerate`, `.../revoke` | a new secret; revoke |
 
 ## Run
 

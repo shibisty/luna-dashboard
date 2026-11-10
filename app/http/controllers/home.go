@@ -25,5 +25,5 @@ type Home struct{ App *fullstack.App }
 // Index is the home page.
 func (h Home) Index(c *web.Ctx) error { return c.HTML(200, "pages/home", page(h.App, c, nil)) }
 
-// Dashboard is the page of logged-in users.
-func (h Home) Dashboard(c *web.Ctx) error { return c.HTML(200, "pages/dashboard", page(h.App, c, nil)) }
+// Dashboard is where logged-in developers land: their applications.
+func (h Home) Dashboard(c *web.Ctx) error { return c.Redirect(0, "/apps") }

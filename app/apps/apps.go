@@ -322,7 +322,7 @@ func (s *Service) Lookup(ctx context.Context, hash string) (*keys.Key, error) {
 		scopes[i] = keys.Scope(sc)
 	}
 	return &keys.Key{ID: k.PublicID, AppID: a.PublicID, AppName: a.Name, Kind: keys.Kind(k.Kind),
-		Scopes: scopes, Origins: []string(k.Origins), IPs: []string(k.IPs)}, nil
+		Scopes: scopes, Origins: []string(k.Origins), IPs: []string(k.IPs), PasswordResetURL: a.PasswordResetURL}, nil
 }
 
 // UserID reads the owner id from a passport identity's ProviderUserID.

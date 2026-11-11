@@ -18,6 +18,9 @@ func Web(app *fullstack.App, au *auth.Auth) {
 	login := controllers.Auth{App: app, Auth: au}
 	ap := controllers.Apps{App: app}
 	us := controllers.Users{App: app}
+	pg := controllers.Pages{App: app}
+	// The page editor's bundle: public, cached by hash.
+	app.Router.Get("/assets/editor/{file}", controllers.EditorAsset).Name("assets.editor")
 	app.Router.Group("/", func(r *web.Router) {
 		r.Use(au.Web(), au.CSRF())
 		r.Get("/", home.Index).Name("home")
@@ -50,6 +53,19 @@ func Web(app *fullstack.App, au *auth.Auth) {
 			r.Post("/{app}/users/{user}/delete", us.Delete)
 			r.Post("/{app}/users/{user}/data", us.SetData)
 			r.Post("/{app}/users/{user}/data/{key}/delete", us.DeleteData)
+
+			// The application's site (luna-pages): the editor, which talks
+			// to luna-pages through api/ (session + CSRF header), previews,
+			// and quick forms for entries.
+			r.Get("/{app}/pages", pg.Editor).Name("apps.pages")
+			r.Any("/{app}/pages/api/{path...}", pg.API)
+			r.Get("/{app}/pages/preview", pg.Preview).Name("apps.pages.preview")
+			r.Get("/{app}/pages/entries", pg.Entries).Name("apps.pages.entries")
+			r.Post("/{app}/pages/entries", pg.CreateEntry)
+			r.Get("/{app}/pages/entries/{entry}", pg.Entry).Name("apps.pages.entry")
+			r.Post("/{app}/pages/entries/{entry}", pg.SaveEntry)
+			r.Post("/{app}/pages/entries/{entry}/publish", pg.PublishEntry)
+			r.Post("/{app}/pages/entries/{entry}/delete", pg.DeleteEntry)
 		}, au.Require())
 	})
 }

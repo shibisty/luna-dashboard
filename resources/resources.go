@@ -1,4 +1,4 @@
-// Package resources embeds the views into the binary.
+// Package resources embeds the views and the page editor's bundle into the binary.
 package resources
 
 import (
@@ -16,6 +16,23 @@ var embedded embed.FS
 
 // Views is the embedded resources directory.
 var Views fs.FS = embedded
+
+// editor is the page editor's bundle (GrapesJS and its plugins, see
+// editor/README.md).
+//
+//go:embed editor/*.js editor/*.css editor/*.woff2 editor/*.woff editor/manifest.json
+var editor embed.FS
+
+// Editor holds the editor's files by name (grapes.min.js, manifest.json…).
+var Editor fs.FS = sub(editor, "editor")
+
+func sub(f fs.FS, dir string) fs.FS {
+	s, err := fs.Sub(f, dir)
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
 
 // dir is this package's directory in the source tree.
 func dir() string {

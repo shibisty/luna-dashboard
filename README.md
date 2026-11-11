@@ -26,10 +26,40 @@ use (at most once a minute). Lists are stored as JSONB (`models.StringList`).
 | `GET /apps/{app}/users`, `POST /apps/{app}/users` | the application's end users (search, pages), a new one |
 | `GET /apps/{app}/users/{user}`, `POST …/{user}`, `POST …/{user}/delete` | a user: account (email, username, verified, new password), delete |
 | `POST …/{user}/data`, `POST …/{user}/data/{key}/delete` | the application's data about the user: set a value, delete a key |
+| `GET /apps/{app}/pages` | the site editor (luna-pages) |
+| `GET /apps/{app}/pages/preview?id=` | a page or an entry as the site shows it |
+| `GET /apps/{app}/pages/entries`, `POST …/entries` | quick forms: the templates' entries, a new entry |
+| `GET /apps/{app}/pages/entries/{entry}`, `POST …/{entry}`, `…/publish`, `…/delete` | an entry's values: save the draft, save and publish, delete |
 
 The users pages call luna-auth's internal API (`app/authapi`, `LUNA_AUTH_URL` with
 `LUNA_AUTH_TOKEN`) after checking that the application is the developer's; without them the
 pages say that luna-auth is not connected.
+
+## The site editor
+
+`/apps/{app}/pages` is GrapesJS 0.23 with
+[grapesjs-pages](https://github.com/shibisty/grapesjs-pages) (pages, layouts, templates, the
+site's styles) and [grapesjs-storage](https://github.com/shibisty/grapesjs-storage) (templates'
+fields, entries), plus grapesjs-preset-webpage, -blocks-basic, -style-bg, -parser-postcss and
+our grapesjs-sidebar-tools and -context-menu. No Node and no CDN: the files are vendored in
+[`resources/editor`](resources/editor/README.md) with their versions and hashes, embedded into
+the binary and served at `/assets/editor/<file>?v=<hash>` (immutable). Font Awesome, which
+GrapesJS would fetch from cdnjs, is among them.
+
+The plugins talk to `/apps/{app}/pages/api/…` on the dashboard: the developer's session cookie,
+the CSRF token in `X-CSRF-Token`. The dashboard checks that the application is the developer's,
+then forwards the request to luna-pages' internal API (`app/pagesapi`, `LUNA_PAGES_URL` with
+`LUNA_PAGES_TOKEN`): the path, the query, the body (4 MiB at most), `If-Match` /
+`If-None-Match`, and back the status, the body and `ETag`. Only `editor/…`, `content/…` and
+`GET render`, `site`, `pages[/{id}]` pass; no key ever reaches the browser.
+
+- **Preview** (the bar's button, or an entry's link) renders the published design, an entry
+  with its draft values, under `Content-Security-Policy: sandbox allow-scripts …`: scripts of a
+  site that allows custom code run in an opaque origin, away from the dashboard's cookies.
+- **Entry forms** edit an entry's values without the canvas: one input per field by type
+  (text, rich text as HTML, number, date, select, yes/no, image and link as URL + text, a list
+  as items with a remove box and an empty row for a new one). Saving sends `If-Match`; a newer
+  version (the editor saved meanwhile) answers 409 with the form kept.
 
 ## Internal API
 
@@ -61,6 +91,7 @@ go run . migrate         # in production; DB_MIGRATE=true does it at start local
 | `DATABASE_DSN` | Postgres, e.g. `postgres://dashboard_user:…@postgres:5432/dashboard_db` |
 | `LUNA_SERVICE_TOKENS` | tokens of the services allowed to introspect keys, comma-separated |
 | `LUNA_AUTH_URL`, `LUNA_AUTH_TOKEN` | luna-auth's internal address and its `LUNA_DASHBOARD_TOKEN`, for the users pages |
+| `LUNA_PAGES_URL`, `LUNA_PAGES_TOKEN` | luna-pages' internal address and its `LUNA_DASHBOARD_TOKEN`, for the site editor |
 | `HTTP_TRUSTED_PROXIES` | nginx's network, so login throttling sees the client |
 | `AUTH_SESSION_TTL` | developers' session lifetime |
 

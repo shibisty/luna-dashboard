@@ -1,0 +1,6 @@
+{{define "title"}}Pages · {{.Application.Name}} · {{.App}}{{end}}
+{{define "content"}}
+<p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a></p>
+<h1>Pages</h1>
+<p class="error">{{.Message}}</p>
+{{end}}

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pages · {{.Application.Name}} · {{.App}}</title>
+  {{range .Styles}}<link rel="stylesheet" href="{{.}}">
+  {{end}}
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; font: 14px/1.4 system-ui, sans-serif; }
+    .luna-bar { display: flex; gap: 1rem; align-items: center; padding: 0 .75rem; height: 40px; flex: none;
+      background: #1f2937; color: #e5e7eb; }
+    .luna-bar a, .luna-bar button { color: #e5e7eb; text-decoration: none; background: none; border: 1px solid #4b5563;
+      border-radius: 4px; padding: .2rem .6rem; font: inherit; cursor: pointer; }
+    .luna-bar a.back { border: 0; padding-left: 0; }
+    .luna-bar a:hover, .luna-bar button:hover { background: #374151; }
+    .luna-bar .title { font-weight: 600; }
+    .luna-bar .spacer { flex: 1; }
+    .luna-bar .status { color: #9ca3af; font-size: 12px; max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .luna-bar .status.error { color: #fca5a5; }
+    #gjs { flex: 1; min-height: 0; }
+  </style>
+</head>
+<body>
+  <div class="luna-bar">
+    <a class="back" href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a>
+    <span class="title">Pages</span>
+    <span class="spacer"></span>
+    <span class="status" id="luna-status" role="status"></span>
+    <button type="button" id="luna-preview" title="The page or entry as the site shows it: the published design with an entry's draft values">Preview</button>
+    <a href="/apps/{{.Application.PublicID}}/pages/entries">Entry forms</a>
+  </div>
+  <div id="gjs"></div>
+
+  <script type="application/json" id="luna-editor">{{.Config}}</script>
+  {{range .Scripts}}<script src="{{.}}"></script>
+  {{end}}
+  <script>
+  (function () {
+    var cfg = JSON.parse(document.getElementById('luna-editor').textContent);
+    var status = document.getElementById('luna-status');
+    function say(text, isError) {
+      status.textContent = text || '';
+      status.title = text || '';
+      status.classList.toggle('error', !!isError);
+    }
+    // Every call goes to the dashboard (same origin, the session cookie),
+    // which checks the CSRF header and forwards it to luna-pages.
+    var headers = function () { return { 'X-CSRF-Token': cfg.csrf }; };
+    var pages = window.grapesjsPages.default;
+    var storage = window.grapesjsStorage;
+
+    var editor = grapesjs.init({
+      container: '#gjs',
+      height: '100%',
+      width: 'auto',
+      storageManager: false,
+      telemetry: false,
+      cssIcons: cfg.icons,
+      i18n: { locale: 'en', detectLocale: false },
+      deviceManager: {
+        devices: [
+          { id: 'desktop', name: 'Desktop', width: '' },
+          { id: 'tablet', name: 'Tablet', width: '768px', widthMedia: '992px' },
+          { id: 'mobile', name: 'Mobile', width: '375px', widthMedia: '767px' }
+        ]
+      },
+      plugins: [
+        'grapesjs-preset-webpage',
+        'gjs-blocks-basic',
+        'grapesjs-style-bg',
+        'grapesjs-parser-postcss',
+        window.grapesjsSidebarTools,
+        window.grapesjsContextMenu.default,
+        // grapesjs-pages first: grapesjs-storage then leaves the templates'
+        // designs to it and keeps only their fields and the entries.
+        function (ed) { return pages(ed, { remote: { url: cfg.api + '/editor', headers: headers } }); },
+        function (ed) { return storage.default(ed, { rest: { url: cfg.api + '/content', headers: headers } }); }
+      ],
+      pluginsOpts: {
+        'grapesjs-preset-webpage': { blocks: ['link-block', 'quote', 'text-basic'] },
+        'gjs-blocks-basic': { flexGrid: true }
+      }
+    });
+    window.editor = editor;
+
+    // What the plugins report, in the bar.
+    var words = { saving: 'Saving…', offline: 'Offline: changes wait in this browser and go out when luna-pages is back.',
+      error: 'Saving failed; retrying. See the console.', conflict: 'Changed elsewhere: resolve the conflict in the panel.' };
+    function state(s) { if (s === 'idle') say('All changes saved'); else if (words[s]) say(words[s], s !== 'saving'); }
+    editor.on('pages-manager:remote', state);
+    editor.on('storage:state', state);
+    editor.on('pages-manager:conflict', function () { state('conflict'); });
+    editor.on('pages-manager:published', function () { say('Published'); });
+
+    // Preview: the open entry, else the open page (layouts and templates
+    // are not pages of the site).
+    document.getElementById('luna-preview').addEventListener('click', function () {
+      var st = editor.ContentStorage && editor.ContentStorage.current();
+      if (st) return open(st.entry.id);
+      var pm = editor.PagesManager;
+      var id = pm && pm.getActiveId();
+      if (!id) return say('Open a page or an entry first.', true);
+      pm.list().then(function (list) {
+        var rec = list.filter(function (r) { return r.id === id; })[0];
+        if (!rec || (rec.kind && rec.kind !== 'page')) return say('Layouts, templates and the site have no preview: open a page.', true);
+        open(id);
+      });
+      function open(pid) { window.open(cfg.pages + '/preview?id=' + encodeURIComponent(pid), '_blank', 'noopener'); }
+    });
+  })();
+  </script>
+</body>
+</html>

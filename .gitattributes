@@ -1,1 +1,6 @@
 * text=auto eol=lf
+# The editor bundle is vendored byte for byte (manifest.json holds the hashes).
+resources/editor/*.js -text
+resources/editor/*.css -text
+resources/editor/*.woff2 binary
+resources/editor/*.woff binary

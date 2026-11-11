@@ -162,7 +162,7 @@ func (in KeyInput) clean() (cleanKey, error) {
 		if len(scopes) == 0 {
 			return out, &FieldError{"scopes", "Choose at least one scope."}
 		}
-		return out, &FieldError{"scopes", "A browser key may only hold auth:login."}
+		return out, &FieldError{"scopes", "A browser key may only hold " + browserScopes() + "."}
 	}
 	out.scopes = scopes
 	for _, line := range lines(in.Origins) {
@@ -393,4 +393,15 @@ func validUUID(s string) bool {
 		}
 	}
 	return true
+}
+
+// browserScopes lists the scopes a browser key may hold, for messages.
+func browserScopes() string {
+	var names []string
+	for _, info := range keys.Scopes() {
+		if info.Browser {
+			names = append(names, string(info.Scope))
+		}
+	}
+	return strings.Join(names, " and ")
 }

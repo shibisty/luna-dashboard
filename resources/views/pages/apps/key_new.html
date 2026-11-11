@@ -13,7 +13,7 @@
     <label><input type="radio" name="kind" value="server" {{if eq .Form.Kind "server"}}checked{{end}}>
       <span><strong>Server</strong> <span class="muted">secret; for your backend; any scope</span></span></label>
     <label><input type="radio" name="kind" value="browser" {{if eq .Form.Kind "browser"}}checked{{end}}>
-      <span><strong>Browser</strong> <span class="muted">public; for web pages on the allowed origins; auth:login only</span></span></label>
+      <span><strong>Browser</strong> <span class="muted">public; for web pages on the allowed origins; auth:login and pages:read only</span></span></label>
     {{with .Errors}}{{template "error" index . "kind"}}{{end}}
   </fieldset>
   <fieldset>

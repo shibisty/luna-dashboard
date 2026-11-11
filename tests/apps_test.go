@@ -72,7 +72,7 @@ func TestApplicationsAndKeys(t *testing.T) {
 		AssertJSONPath("ips", []string{"203.0.113.0/24", "2001:db8::1/128"})
 	c.Get("/apps/"+id).AssertOK().AssertSee("backend", keys.Hint(server)).AssertDontSee(server)
 
-	// browser keys: origins required, auth:login only
+	// browser keys: origins required, auth:login and pages:read only
 	c.Post("/apps/"+id+"/keys", url.Values{"kind": {"browser"}, "scopes": {"auth:login"}}).
 		AssertUnprocessable().AssertSee("at least one allowed origin")
 	c.Post("/apps/"+id+"/keys", url.Values{"kind": {"browser"}, "scopes": {"auth:users.read"}, "origins": {"https://shop.example"}}).

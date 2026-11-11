@@ -11,7 +11,7 @@ database (`passport_sessions`, passport-session-sql).
 
 State: stage 4 of the migration plan. Developers sign up and log in (sessions in the database),
 create applications (`/apps`) and their keys: server keys (`sk_live_…`, any scope, optional
-network allow-list) and browser keys (`pk_live_…`, allowed origins, `auth:login` only). A key's
+network allow-list) and browser keys (`pk_live_…`, allowed origins, `auth:login` and `pages:read` only). A key's
 secret is shown once (`Cache-Control: no-store`); afterwards only its hint. Keys can get a new
 secret or be revoked; services notice within their cache time (60 s). The introspection endpoint
 answers with the key's application, kind, scopes, origins and networks and records the key's last

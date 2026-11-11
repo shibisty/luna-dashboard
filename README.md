@@ -56,6 +56,9 @@ then forwards the request to luna-pages' internal API (`app/pagesapi`, `LUNA_PAG
 - **Preview** (the bar's button, or an entry's link) renders the published design, an entry
   with its draft values, under `Content-Security-Policy: sandbox allow-scripts …`: scripts of a
   site that allows custom code run in an opaque origin, away from the dashboard's cookies.
+- **Fields** of a template are marked in its design (an element's settings) or written as
+  placeholders, `{{price}}` in a text or an address; `{{entry.slug}}` and friends show the entry's
+  own (see grapesjs-storage's README). The rich text toolbar's **{…}** inserts them.
 - **Entry forms** edit an entry's values without the canvas: one input per field by type
   (text, rich text as HTML, number, date, select, yes/no, image and link as URL + text, a list
   as items with a remove box and an empty row for a new one). Saving sends `If-Match`; a newer

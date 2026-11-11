@@ -79,7 +79,8 @@
         function (ed) { return storage.default(ed, { rest: { url: cfg.api + '/content', headers: headers } }); }
       ],
       pluginsOpts: {
-        'grapesjs-preset-webpage': { blocks: ['link-block', 'quote', 'text-basic'] },
+        // No jumping to the style manager on every selection: the Pages and Content panels stay open.
+        'grapesjs-preset-webpage': { blocks: ['link-block', 'quote', 'text-basic'], showStylesOnChange: false },
         'gjs-blocks-basic': { flexGrid: true }
       }
     });

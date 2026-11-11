@@ -80,9 +80,9 @@
     {
       "file": "grapesjs-storage.js",
       "package": "grapesjs-storage",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "source": "github.com/shibisty/grapesjs-storage",
-      "sha256": "41cb7f16c876a1eb1b424de3c527360090c32a466e625a8244616f0d44804eda"
+      "sha256": "ec00f5bc3d0cc31b21a0691452e3a63a09fc9776f1659adab071f2963af8380e"
     },
     {
       "file": "grapesjs-style-bg.js",

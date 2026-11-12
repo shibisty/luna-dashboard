@@ -1,6 +1,6 @@
-{{define "title"}}Preview · {{.Application.Name}} · {{.App}}{{end}}
+{{define "title"}}{{.L.T "Preview"}} · {{.Application.Name}} · {{.App}}{{end}}
 {{define "content"}}
-<p><a href="/apps/{{.Application.PublicID}}/pages">← Pages of {{.Application.Name}}</a></p>
-<h1>Nothing to preview yet</h1>
-<p>A preview shows the published design: publish the page (or, for an entry, its template) first. Until then the editor's canvas is the draft.</p>
+<p><a href="/apps/{{.Application.PublicID}}/pages">← {{.L.T "Pages of %s" .Application.Name}}</a></p>
+<h1>{{.L.T "Nothing to preview yet"}}</h1>
+<p>{{.L.T "A preview shows the published design: publish the page (or, for an entry, its template) first. Until then the editor's canvas is the draft."}}</p>
 {{end}}

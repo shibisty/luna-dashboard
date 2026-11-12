@@ -1,0 +1,6 @@
+{{define "title"}}{{.Status}} · {{.App}}{{end}}
+{{define "content"}}
+<h1>{{.L.T (statusText .Status)}}</h1>
+<p class="error">{{.Message}}</p>
+<p><a href="{{if .Me}}/apps{{else}}/{{end}}">{{if .Me}}← {{.L.T "Applications"}}{{else}}← {{.L.T "Home"}}{{end}}</a></p>
+{{end}}

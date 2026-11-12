@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{.Lang.Code}}" data-theme="{{.Theme}}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pages · {{.Application.Name}} · {{.App}}</title>
+  <title>{{.L.T "Pages"}} · {{.Application.Name}} · {{.App}}</title>
   {{range .Styles}}<link rel="stylesheet" href="{{.}}">
   {{end}}
   <style>
@@ -11,7 +11,7 @@
     body { display: flex; flex-direction: column; font: 14px/1.5 var(--luna-font, Roboto, Arial, sans-serif); background: var(--luna-bg, #f5f5f5); }
     /* MUI's AppBar: primary, dense. */
     .luna-bar { display: flex; gap: 8px; align-items: center; padding: 0 12px 0 8px; height: 48px; flex: none; position: relative; z-index: 2;
-      background: var(--luna-primary, #1976d2); color: #fff; box-shadow: var(--luna-shadow-4); }
+      background: var(--luna-appbar, #1976d2); color: #fff; box-shadow: var(--luna-shadow-4); }
     .luna-bar a, .luna-bar button { color: #fff; text-decoration: none; background: none; border: 1px solid rgba(255,255,255,.5);
       border-radius: 4px; padding: 4px 12px; font: 500 13px/1.75 inherit; letter-spacing: .02em; text-transform: uppercase; cursor: pointer; }
     .luna-bar a.back { border: 0; text-transform: none; font-size: 14px; padding: 6px 10px; }
@@ -20,17 +20,25 @@
     .luna-bar .spacer { flex: 1; }
     .luna-bar .status { color: rgba(255,255,255,.75); font-size: 12px; max-width: 48ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .luna-bar .status.error { color: #ffcdd2; }
+    .luna-bar .toggle { display: inline-flex; border: 1px solid rgba(255,255,255,.4); border-radius: 4px; overflow: hidden; }
+    .luna-bar .toggle a { border: 0; border-radius: 0; display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 28px; padding: 0 6px;
+      font: 500 11px/1 inherit; letter-spacing: .04em; opacity: .8; }
+    .luna-bar .toggle a + a { border-left: 1px solid rgba(255,255,255,.4); }
+    .luna-bar .toggle a[aria-current="true"] { background: rgba(255,255,255,.24); opacity: 1; }
+    .luna-bar .toggle a:hover { opacity: 1; }
+    .luna-bar .toggle svg { width: 16px; height: 16px; fill: currentColor; }
     #gjs { flex: 1; min-height: 0; }
   </style>
 </head>
 <body>
   <div class="luna-bar">
     <a class="back" href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a>
-    <span class="title">Pages</span>
+    <span class="title">{{.L.T "Pages"}}</span>
     <span class="spacer"></span>
     <span class="status" id="luna-status" role="status"></span>
-    <button type="button" id="luna-preview" title="The page or entry as the site shows it: the published design with an entry's draft values">Preview</button>
-    <a href="/apps/{{.Application.PublicID}}/pages/entries">Entry forms</a>
+    <button type="button" id="luna-preview" title="{{.L.T "The page or entry as the site shows it: the published design with an entry's draft values"}}">{{.L.T "Preview"}}</button>
+    <a href="/apps/{{.Application.PublicID}}/pages/entries">{{.L.T "Entry forms"}}</a>
+    {{template "prefs" .}}
   </div>
   <div id="gjs"></div>
 
@@ -59,12 +67,12 @@
       storageManager: false,
       telemetry: false,
       cssIcons: cfg.icons,
-      i18n: { locale: 'en', detectLocale: false },
+      i18n: { locale: cfg.lang, detectLocale: false, messagesAdd: (window.grapesjsLocales || {}) },
       deviceManager: {
         devices: [
-          { id: 'desktop', name: 'Desktop', width: '' },
-          { id: 'tablet', name: 'Tablet', width: '768px', widthMedia: '992px' },
-          { id: 'mobile', name: 'Mobile', width: '375px', widthMedia: '767px' }
+          { id: 'desktop', name: {{.L.T "Desktop"}}, width: '' },
+          { id: 'tablet', name: {{.L.T "Tablet"}}, width: '768px', widthMedia: '992px' },
+          { id: 'mobile', name: {{.L.T "Mobile"}}, width: '375px', widthMedia: '767px' }
         ]
       },
       plugins: [
@@ -109,7 +117,7 @@
         'grapesjs-preset-webpage': { blocks: ['link-block', 'quote', 'text-basic'], showStylesOnChange: false, useCustomTheme: false },
         'gjs-blocks-basic': { flexGrid: true },
         'grapesjs-plugin-forms': { blocks: ['form', 'input', 'textarea', 'select', 'checkbox', 'radio', 'button'] },
-        'grapesjs-plugin-export': { btnLabel: 'Export ZIP' },
+        'grapesjs-plugin-export': { btnLabel: {{.L.T "Export ZIP"}} },
         // The image editor's files come from the dashboard, not uicdn.toast.com;
         // no usage statistics to Google Analytics, no logo from uicdn.
         'grapesjs-tui-image-editor': {
@@ -126,16 +134,27 @@
     // Plugins add their CSS as they start: the theme goes after it.
     editor.onReady(function () {
       document.querySelectorAll('link[href*="luna-theme.css"]').forEach(function (l) { document.head.appendChild(l); });
+      // The plugins' labels and the buttons' tooltips in the dashboard's language.
+      var labels = cfg.labels || {}, bm = editor.Blocks;
+      bm.getAll().forEach(function (b) { var t = labels[b.get('label')]; if (t) b.set('label', t); });
+      bm.getCategories().forEach(function (c) { var t = labels[c.get('label') || c.id]; if (t) c.set('label', t); });
+      bm.render();
+      editor.Panels.getPanels().forEach(function (pn) {
+        pn.get('buttons').forEach(function (bt) {
+          var t = cfg.titles && cfg.titles[bt.id];
+          if (t) bt.set('attributes', Object.assign({}, bt.get('attributes'), { title: t }));
+        });
+      });
     });
 
     // What the plugins report, in the bar.
-    var words = { saving: 'Saving…', offline: 'Offline: changes wait in this browser and go out when luna-pages is back.',
-      error: 'Saving failed; retrying. See the console.', conflict: 'Changed elsewhere: resolve the conflict in the panel.' };
-    function state(s) { if (s === 'idle') say('All changes saved'); else if (words[s]) say(words[s], s !== 'saving'); }
+    var words = { saving: {{.L.T "Saving…"}}, offline: {{.L.T "Offline: changes wait in this browser and go out when luna-pages is back."}},
+      error: {{.L.T "Saving failed; retrying. See the console."}}, conflict: {{.L.T "Changed elsewhere: resolve the conflict in the panel."}} };
+    function state(s) { if (s === 'idle') say({{.L.T "All changes saved"}}); else if (words[s]) say(words[s], s !== 'saving'); }
     editor.on('pages-manager:remote', state);
     editor.on('storage:state', state);
     editor.on('pages-manager:conflict', function () { state('conflict'); });
-    editor.on('pages-manager:published', function () { say('Published'); });
+    editor.on('pages-manager:published', function () { say({{.L.T "Published"}}); });
 
     // Preview: the open entry, else the open page (layouts and templates
     // are not pages of the site).
@@ -144,10 +163,10 @@
       if (st) return open(st.entry.id);
       var pm = editor.PagesManager;
       var id = pm && pm.getActiveId();
-      if (!id) return say('Open a page or an entry first.', true);
+      if (!id) return say({{.L.T "Open a page or an entry first."}}, true);
       pm.list().then(function (list) {
         var rec = list.filter(function (r) { return r.id === id; })[0];
-        if (!rec || (rec.kind && rec.kind !== 'page')) return say('Layouts, templates and the site have no preview: open a page.', true);
+        if (!rec || (rec.kind && rec.kind !== 'page')) return say({{.L.T "Layouts, templates and the site have no preview: open a page."}}, true);
         open(id);
       });
       function open(pid) { window.open(cfg.pages + '/preview?id=' + encodeURIComponent(pid), '_blank', 'noopener'); }

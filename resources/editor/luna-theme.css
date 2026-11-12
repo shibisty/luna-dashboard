@@ -1,12 +1,14 @@
 /*
- * Luna's theme for GrapesJS: light, after Material UI (MUI's default
+ * Luna's theme for GrapesJS: light and dark, after Material UI (MUI's default
  * palette, Roboto, 4/8px radii, its elevations), with sizes in pixels so
  * the panels look the same on a 4K screen as on a laptop.
  *
  * It sets GrapesJS' own variables first, then restyles what the variables
  * do not reach: the panels, blocks, fields, the canvas' frame, modals, the
  * rich text toolbar, and the plugins whose CSS assumes the dark theme.
- * Load it after grapes.min.css and the plugins' CSS.
+ * Load it after grapes.min.css and the plugins' CSS. Dark is
+ * <html data-theme="dark">, or data-theme="system" with a dark system
+ * (the dashboard's luna_theme cookie).
  */
 
 @font-face { font-family: 'Roboto'; font-style: normal; font-display: swap; font-weight: 400;
@@ -23,6 +25,7 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 :root {
+  color-scheme: light;
   /* MUI's palette */
   --luna-primary: #1976d2;
   --luna-primary-dark: #1565c0;
@@ -46,6 +49,13 @@
   --luna-shadow-4: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12);
   --luna-shadow-8: 0 5px 5px -3px rgba(0,0,0,.2), 0 8px 10px 1px rgba(0,0,0,.14), 0 3px 14px 2px rgba(0,0,0,.12);
   --luna-shadow-24: 0 11px 15px -7px rgba(0,0,0,.2), 0 24px 38px 3px rgba(0,0,0,.14), 0 9px 46px 8px rgba(0,0,0,.12);
+  --luna-on-primary: #fff;
+  --luna-appbar: #1976d2;
+  --luna-primary-border: rgba(25, 118, 210, 0.5);
+  --luna-hover-2: rgba(0, 0, 0, 0.06);
+  --luna-soft: rgba(0, 0, 0, 0.02);
+  --luna-surface-2: #fafafa;
+  --luna-scroll: rgba(0, 0, 0, 0.22);
   --luna-font: Roboto, 'Helvetica Neue', Arial, sans-serif;
   --luna-sidebar: 320px;
 
@@ -59,11 +69,11 @@
   --gjs-main-color: var(--luna-paper);
   --gjs-font-color: var(--luna-text);
   --gjs-font-color-active: var(--luna-primary);
-  --gjs-main-dark-color: rgba(0, 0, 0, 0.04);
-  --gjs-secondary-dark-color: rgba(0, 0, 0, 0.06);
-  --gjs-main-light-color: rgba(0, 0, 0, 0.04);
+  --gjs-main-dark-color: var(--luna-hover);
+  --gjs-secondary-dark-color: var(--luna-hover-2);
+  --gjs-main-light-color: var(--luna-hover);
   --gjs-secondary-light-color: var(--luna-text-2);
-  --gjs-soft-light-color: rgba(0, 0, 0, 0.02);
+  --gjs-soft-light-color: var(--luna-soft);
   --gjs-light-border: var(--luna-divider);
   --gjs-arrow-color: var(--luna-text-2);
   --gjs-dark-text-shadow: transparent;
@@ -77,10 +87,74 @@
   --gjs-canvas-top: 48px;
 }
 
+/* Dark: MUI's dark palette, chosen or the system's. */
+[data-theme="dark"] {
+  --luna-primary: #90caf9;
+  --luna-primary-dark: #42a5f5;
+  --luna-primary-soft: rgba(144, 202, 249, 0.16);
+  --luna-primary-softer: rgba(144, 202, 249, 0.08);
+  --luna-primary-border: rgba(144, 202, 249, 0.5);
+  --luna-on-primary: rgba(0, 0, 0, 0.87);
+  --luna-appbar: #272727;
+  --luna-text: #fff;
+  --luna-text-2: rgba(255, 255, 255, 0.7);
+  --luna-text-3: rgba(255, 255, 255, 0.5);
+  --luna-divider: rgba(255, 255, 255, 0.12);
+  --luna-border: rgba(255, 255, 255, 0.23);
+  --luna-hover: rgba(255, 255, 255, 0.08);
+  --luna-hover-2: rgba(255, 255, 255, 0.06);
+  --luna-soft: rgba(255, 255, 255, 0.03);
+  --luna-paper: #1e1e1e;
+  --luna-surface-2: #262626;
+  --luna-bg: #121212;
+  --luna-canvas: #0b0b0b;
+  --luna-error: #f44336;
+  --luna-warning: #ffa726;
+  --luna-success: #66bb6a;
+  --luna-scroll: rgba(255, 255, 255, 0.24);
+  --luna-shadow-1: 0 2px 1px -1px rgba(0,0,0,.4), 0 1px 1px 0 rgba(0,0,0,.28), 0 1px 3px 0 rgba(0,0,0,.24);
+  --luna-shadow-4: 0 2px 4px -1px rgba(0,0,0,.4), 0 4px 5px 0 rgba(0,0,0,.28), 0 1px 10px 0 rgba(0,0,0,.24);
+  --luna-shadow-8: 0 5px 5px -3px rgba(0,0,0,.4), 0 8px 10px 1px rgba(0,0,0,.28), 0 3px 14px 2px rgba(0,0,0,.24);
+  --luna-shadow-24: 0 11px 15px -7px rgba(0,0,0,.4), 0 24px 38px 3px rgba(0,0,0,.28), 0 9px 46px 8px rgba(0,0,0,.24);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] {
+    --luna-primary: #90caf9;
+    --luna-primary-dark: #42a5f5;
+    --luna-primary-soft: rgba(144, 202, 249, 0.16);
+    --luna-primary-softer: rgba(144, 202, 249, 0.08);
+    --luna-primary-border: rgba(144, 202, 249, 0.5);
+    --luna-on-primary: rgba(0, 0, 0, 0.87);
+    --luna-appbar: #272727;
+    --luna-text: #fff;
+    --luna-text-2: rgba(255, 255, 255, 0.7);
+    --luna-text-3: rgba(255, 255, 255, 0.5);
+    --luna-divider: rgba(255, 255, 255, 0.12);
+    --luna-border: rgba(255, 255, 255, 0.23);
+    --luna-hover: rgba(255, 255, 255, 0.08);
+    --luna-hover-2: rgba(255, 255, 255, 0.06);
+    --luna-soft: rgba(255, 255, 255, 0.03);
+    --luna-paper: #1e1e1e;
+    --luna-surface-2: #262626;
+    --luna-bg: #121212;
+    --luna-canvas: #0b0b0b;
+    --luna-error: #f44336;
+    --luna-warning: #ffa726;
+    --luna-success: #66bb6a;
+    --luna-scroll: rgba(255, 255, 255, 0.24);
+    --luna-shadow-1: 0 2px 1px -1px rgba(0,0,0,.4), 0 1px 1px 0 rgba(0,0,0,.28), 0 1px 3px 0 rgba(0,0,0,.24);
+    --luna-shadow-4: 0 2px 4px -1px rgba(0,0,0,.4), 0 4px 5px 0 rgba(0,0,0,.28), 0 1px 10px 0 rgba(0,0,0,.24);
+    --luna-shadow-8: 0 5px 5px -3px rgba(0,0,0,.4), 0 8px 10px 1px rgba(0,0,0,.28), 0 3px 14px 2px rgba(0,0,0,.24);
+    --luna-shadow-24: 0 11px 15px -7px rgba(0,0,0,.4), 0 24px 38px 3px rgba(0,0,0,.28), 0 9px 46px 8px rgba(0,0,0,.24);
+    color-scheme: dark;
+  }
+}
+
 .gjs-editor, .gjs-editor-cont { font-family: var(--luna-font); color: var(--luna-text); background: var(--luna-bg); }
 .gjs-one-bg { background-color: var(--luna-paper); }
 .gjs-two-color { color: var(--luna-text); }
-.gjs-three-bg { background-color: var(--luna-primary); color: #fff; }
+.gjs-three-bg { background-color: var(--luna-primary); color: var(--luna-on-primary); }
 .gjs-four-color, .gjs-four-color-h:hover { color: var(--luna-primary); }
 
 /* ---------- panels and buttons ---------- */
@@ -163,7 +237,7 @@
 .gjs-sm-composite, .gjs-sm-stack .gjs-sm-layers, .gjs-sm-layer { background: var(--luna-bg); border-radius: var(--luna-radius); }
 .gjs-sm-layer.gjs-sm-active { background: var(--luna-primary-soft); }
 .gjs-sm-btn, .gjs-sm-add, .gjs-btn-prim {
-  background: var(--luna-primary); color: #fff; border: 0; border-radius: var(--luna-radius);
+  background: var(--luna-primary); color: var(--luna-on-primary); border: 0; border-radius: var(--luna-radius);
   padding: 6px 16px; font: 500 13px/1.75 var(--luna-font); letter-spacing: .02em; text-transform: uppercase; box-shadow: var(--luna-shadow-1);
 }
 .gjs-btn-prim:hover, .gjs-sm-btn:hover { background: var(--luna-primary-dark); }
@@ -178,7 +252,7 @@
 
 /* layers */
 .gjs-layer { background: transparent; color: var(--luna-text); }
-.gjs-layer-item { border-bottom: 1px solid rgba(0, 0, 0, .06); padding-top: 6px; padding-bottom: 6px; }
+.gjs-layer-item { border-bottom: 1px solid var(--luna-hover-2); padding-top: 6px; padding-bottom: 6px; }
 .gjs-layer-item:hover { background: var(--luna-hover); }
 .gjs-layer.gjs-selected > .gjs-layer-item, .gjs-layer.gjs-selected .gjs-layer-item { background: var(--luna-primary-soft); color: var(--luna-primary); }
 .gjs-layer-hovered > .gjs-layer-item { background: var(--luna-hover); }
@@ -188,13 +262,13 @@
 /* ---------- canvas helpers ---------- */
 
 .gjs-toolbar { background: var(--luna-primary); border-radius: var(--luna-radius); box-shadow: var(--luna-shadow-4); }
-.gjs-toolbar-item { color: #fff; }
-.gjs-badge { background: var(--luna-primary); color: #fff; border-radius: var(--luna-radius); font-family: var(--luna-font); box-shadow: var(--luna-shadow-1); }
+.gjs-toolbar-item { color: var(--luna-on-primary); }
+.gjs-badge { background: var(--luna-primary); color: var(--luna-on-primary); border-radius: var(--luna-radius); font-family: var(--luna-font); box-shadow: var(--luna-shadow-1); }
 .gjs-selected { outline-color: var(--luna-primary) !important; }
 .gjs-hovered, .gjs-highlighter { outline-color: rgba(25, 118, 210, .5) !important; }
 .gjs-placeholder { border-color: var(--luna-primary) transparent; }
 .gjs-placeholder-int { background-color: var(--luna-primary); }
-.gjs-resizer-h { border-color: var(--luna-primary); background: #fff; }
+.gjs-resizer-h { border-color: var(--luna-primary); background: var(--luna-paper); }
 .gjs-offset-v, .gjs-offset-fixed-v { background-color: rgba(25, 118, 210, .12); }
 .gjs-padding-v-el, .gjs-padding-fixed-v { background-color: rgba(46, 125, 50, .15); }
 
@@ -231,9 +305,9 @@
 /* ---------- scrollbars ---------- */
 
 .gjs-editor ::-webkit-scrollbar { width: 10px; height: 10px; }
-.gjs-editor ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .2); border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+.gjs-editor ::-webkit-scrollbar-thumb { background: var(--luna-scroll); border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
 .gjs-editor ::-webkit-scrollbar-track { background: transparent; }
-.gjs-editor * { scrollbar-color: rgba(0, 0, 0, .25) transparent; scrollbar-width: thin; }
+.gjs-editor * { scrollbar-color: var(--luna-scroll) transparent; scrollbar-width: thin; }
 
 /* ---------- plugins written for the dark theme ---------- */
 
@@ -247,9 +321,9 @@
 .gjsp-search:focus, .gjss-search:focus, .gjsp-select:focus, .gjsp-input:focus, .gjss-input:focus { outline: 0; border-color: var(--luna-primary); box-shadow: 0 0 0 1px var(--luna-primary); }
 .gjsp-modal td { border-bottom-color: var(--luna-divider); }
 .gjss-item fieldset, .gjss-items fieldset { border-color: var(--luna-divider); }
-.gjsp-secondary, .gjss-secondary { background: transparent; color: var(--luna-primary); border: 1px solid rgba(25, 118, 210, .5); border-radius: var(--luna-radius); }
+.gjsp-secondary, .gjss-secondary { background: transparent; color: var(--luna-primary); border: 1px solid var(--luna-primary-border); border-radius: var(--luna-radius); }
 .gjsp-secondary:hover, .gjss-secondary:hover { background: var(--luna-primary-softer); border-color: var(--luna-primary); }
-.gjsp-primary, .gjss-primary { background: var(--luna-primary); color: #fff; border-radius: var(--luna-radius); box-shadow: var(--luna-shadow-1); }
+.gjsp-primary, .gjss-primary { background: var(--luna-primary); color: var(--luna-on-primary); border-radius: var(--luna-radius); box-shadow: var(--luna-shadow-1); }
 .gjsp-toggle, .gjss-toggle { border-color: var(--luna-divider); box-shadow: var(--luna-shadow-1); }
 .gjss-floating { box-shadow: var(--luna-shadow-8); }
 .gjss-menu { background: var(--luna-paper); color: var(--luna-text); border: 0; border-radius: var(--luna-radius); box-shadow: var(--luna-shadow-8); font-family: var(--luna-font); }
@@ -263,9 +337,14 @@
 .gjs-field input, .gjs-field select { padding: 6px 8px; box-sizing: border-box; }
 .gjs-input-holder, .gjs-field .gjs-input-holder { border: 0; background: transparent; box-shadow: none; }
 .gjs-sm-composite.gjs-sm-property, .gjs-sm-composite .gjs-sm-properties {
-  background: #fafafa; border: 1px solid var(--luna-divider); border-radius: var(--luna-radius);
+  background: var(--luna-surface-2); border: 1px solid var(--luna-divider); border-radius: var(--luna-radius);
 }
 .gjs-btn-prim { white-space: nowrap; }
+/* the asset manager's URL field and its button side by side, the button as wide as its label */
+.gjs-am-add-asset { display: flex; gap: 12px; align-items: center; }
+.gjs-am-add-asset .gjs-am-add-field { float: none; width: auto; flex: 1; min-width: 0; }
+.gjs-am-add-asset .gjs-btn-prim { float: none; width: auto; flex: none; }
+.gjs-am-add-asset > div[style*="clear"] { display: none; }
 .gjs-mdl-btn-close:hover { color: var(--luna-text); }
 .cm-s-hopscotch.CodeMirror, .cm-s-hopscotch .CodeMirror-gutters { background: #263238; }
 .cm-s-hopscotch .CodeMirror-gutters { border-right: 1px solid rgba(255, 255, 255, .08); }

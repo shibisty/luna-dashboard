@@ -1,14 +1,14 @@
 {{define "title"}}{{.User.Email}} · {{.Application.Name}} · {{.App}}{{end}}
 {{define "content"}}
-<p><a href="/apps/{{.Application.PublicID}}/users">← Users of {{.Application.Name}}</a></p>
+<p><a href="/apps/{{.Application.PublicID}}/users">← {{.L.T "Users of %s" .Application.Name}}</a></p>
 <h1>{{.User.Email}}</h1>
-<p class="muted">User ID <code>{{.User.ID}}</code> · signed up {{.User.CreatedAt.Format "2006-01-02 15:04"}} · changed {{.User.UpdatedAt.Format "2006-01-02 15:04"}}</p>
+<p class="muted">{{.L.H "User ID <code>%s</code> · signed up %s · changed %s" .User.ID (.User.CreatedAt.Format "2006-01-02 15:04") (.User.UpdatedAt.Format "2006-01-02 15:04")}}</p>
 
-<h2 id="data">Data</h2>
-<p class="muted">What {{.Application.Name}} keeps about this user: text values by key. Servers use <code>/v1/users/{id}/data</code> with <code>auth:data.read</code> / <code>auth:data.write</code>; the user reads their own at <code>/v1/me/data</code>.</p>
+<h2 id="data">{{.L.T "Data"}}</h2>
+<p class="muted">{{.L.H "What %s keeps about this user: text values by key. Servers use <code>/v1/users/{id}/data</code> with <code>auth:data.read</code> / <code>auth:data.write</code>; the user reads their own at <code>/v1/me/data</code>." .Application.Name}}</p>
 {{if .Data}}
-<table>
-  <tr><th>Key</th><th>Value</th><th></th></tr>
+<div class="table-wrap"><table>
+  <tr><th>{{.L.T "Key"}}</th><th>{{.L.T "Value"}}</th><th></th></tr>
   {{range $key, $value := .Data}}
   <tr>
     <td><code>{{$key}}</code></td>
@@ -16,56 +16,56 @@
       <form class="inline-value" method="post" action="{{$.URL}}/data">
         {{$.CSRFField}}
         <input type="hidden" name="key" value="{{$key}}">
-        <textarea name="value" maxlength="16384" aria-label="Value of {{$key}}">{{$value}}</textarea>
-        <button>Save</button>
+        <textarea name="value" maxlength="16384" aria-label="{{$.L.T "Value of %s" $key}}">{{$value}}</textarea>
+        <button>{{$.L.T "Save"}}</button>
       </form>
     </td>
     <td>
-      <form method="post" action="{{$.URL}}/data/{{$key}}/delete">{{$.CSRFField}}<button class="danger">Delete</button></form>
+      <form method="post" action="{{$.URL}}/data/{{$key}}/delete">{{$.CSRFField}}<button class="danger">{{$.L.T "Delete"}}</button></form>
     </td>
   </tr>
   {{end}}
-</table>
+</table></div>
 {{else}}
-<p class="muted">No data yet.</p>
+<p class="muted">{{.L.T "No data yet."}}</p>
 {{end}}
 
 <form class="card" method="post" action="{{.URL}}/data">
   {{.CSRFField}}
-  <label>Key <span class="muted">letters, digits, _ . : - (e.g. profile.city)</span>
+  <label><span>{{.L.T "Key"}} <span class="muted">{{.L.T "letters, digits, _ . : - (e.g. profile.city)"}}</span></span>
     <input name="key" value="{{.DataForm.Key}}" maxlength="64" required pattern="[A-Za-z0-9][A-Za-z0-9_.:\-]{0,63}">
     {{with .DataErrors}}{{template "error" index . "key"}}{{end}}
   </label>
-  <label>Value
+  <label>{{.L.T "Value"}}
     <textarea name="value" maxlength="16384">{{.DataForm.Value}}</textarea>
     {{with .DataErrors}}{{template "error" index . "value"}}{{end}}
   </label>
-  <button>Set value</button>
+  <button>{{.L.T "Set value"}}</button>
 </form>
 
-<h2>Account</h2>
+<h2>{{.L.T "Account"}}</h2>
 <form class="card" method="post" action="{{.URL}}">
   {{.CSRFField}}
-  <label>Email
+  <label>{{.L.T "Email"}}
     <input name="email" type="email" value="{{.Form.Email}}" maxlength="254" required>
     {{with .Errors}}{{template "error" index . "email"}}{{end}}
   </label>
-  <label>Username <span class="muted">empty removes it</span>
+  <label><span>{{.L.T "Username"}} <span class="muted">{{.L.T "empty removes it"}}</span></span>
     <input name="username" value="{{.Form.Username}}" maxlength="32">
     {{with .Errors}}{{template "error" index . "username"}}{{end}}
   </label>
-  <label class="check"><input type="checkbox" name="email_verified" value="1" {{if .Form.EmailVerified}}checked{{end}}> Email is verified</label>
-  <label>New password <span class="muted">optional; signs the user out everywhere</span>
+  <label class="check"><input type="checkbox" name="email_verified" value="1" {{if .Form.EmailVerified}}checked{{end}}> {{.L.T "Email is verified"}}</label>
+  <label><span>{{.L.T "New password"}} <span class="muted">{{.L.T "optional; signs the user out everywhere"}}</span></span>
     <input name="password" type="password" minlength="8" maxlength="200" autocomplete="new-password">
     {{with .Errors}}{{template "error" index . "password"}}{{end}}
   </label>
-  <button>Save</button>
+  <button>{{.L.T "Save"}}</button>
 </form>
 
-<h2 class="danger">Delete</h2>
+<h2 class="danger">{{.L.T "Delete"}}</h2>
 <form method="post" action="{{.URL}}/delete">
   {{.CSRFField}}
-  <p class="muted">Deletes the user and the data above, and signs them out everywhere.</p>
-  <button class="danger">Delete {{.User.Email}}</button>
+  <p class="muted">{{.L.T "Deletes the user and the data above, and signs them out everywhere."}}</p>
+  <button class="danger">{{.L.T "Delete %s" .User.Email}}</button>
 </form>
 {{end}}

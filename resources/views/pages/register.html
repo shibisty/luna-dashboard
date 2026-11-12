@@ -1,24 +1,25 @@
-{{define "title"}}Register · {{.App}}{{end}}
+{{define "title"}}{{.L.T "Register"}} · {{.App}}{{end}}
 {{define "content"}}
-<h1>Register</h1>
+<h1>{{.L.T "Register"}}</h1>
 <form class="card" method="post" action="/register">
   {{.CSRFField}}
-  <label>Name
-    <input name="name" value="{{.Name}}" required autofocus>
+  <label>{{.L.T "Name"}}
+    <input name="name" value="{{.Name}}" required autofocus autocomplete="name">
     {{with .Errors}}{{template "error" index . "name"}}{{end}}
   </label>
-  <label>Email
-    <input name="email" type="email" value="{{.Email}}" required>
+  <label>{{.L.T "Email"}}
+    <input name="email" type="email" value="{{.Email}}" required autocomplete="username">
     {{with .Errors}}{{template "error" index . "email"}}{{end}}
   </label>
-  <label>Password
-    <input name="password" type="password" minlength="8" required>
+  <label>{{.L.T "Password"}}
+    <input name="password" type="password" minlength="8" required autocomplete="new-password">
     {{with .Errors}}{{template "error" index . "password"}}{{end}}
   </label>
-  <label>Confirm password
-    <input name="password_confirmation" type="password" required>
+  <label>{{.L.T "Confirm password"}}
+    <input name="password_confirmation" type="password" required autocomplete="new-password">
     {{with .Errors}}{{template "error" index . "password_confirmation"}}{{end}}
   </label>
-  <button>Register</button>
+  <button>{{.L.T "Register"}}</button>
 </form>
+<p>{{.L.T "Have an account?"}} <a href="/login">{{.L.T "Log in"}}</a>.</p>
 {{end}}

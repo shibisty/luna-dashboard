@@ -1,11 +1,9 @@
 {{define "content"}}
-<h1>Welcome to {{.App}}</h1>
-<p>A fullstack Go application: routes in <code>routes/</code>, handlers in <code>app/http/controllers</code>,
-views in <code>resources/views</code>, migrations in <code>database/migrations</code>.</p>
-{{if .User}}
-  <p>You are logged in as {{.User.Name}}. <a href="/dashboard">Go to the dashboard</a>.</p>
+<h1>{{.L.T "Welcome to %s" .App}}</h1>
+<p>{{.L.T "Luna's dashboard: your applications, their API keys, their users and their sites."}}</p>
+{{if .Me}}
+  <p>{{.L.T "You are logged in as %s." .Me.Name}} <a href="/apps">{{.L.T "Go to your applications"}}</a>.</p>
 {{else}}
-  <p><a href="/register">Create an account</a> or <a href="/login">log in</a>
-  (after <code>go run . db:seed</code>: demo@example.com / password).</p>
+  <p><a href="/register">{{.L.T "Create an account"}}</a> {{.L.T "or"}} <a href="/login">{{.L.T "log in"}}</a>.</p>
 {{end}}
 {{end}}

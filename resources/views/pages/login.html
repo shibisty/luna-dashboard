@@ -1,18 +1,18 @@
-{{define "title"}}Log in · {{.App}}{{end}}
+{{define "title"}}{{.L.T "Log in"}} · {{.App}}{{end}}
 {{define "content"}}
-<h1>Log in</h1>
+<h1>{{.L.T "Log in"}}</h1>
 <form class="card" method="post" action="/login{{with .Redirect}}?redirect={{.}}{{end}}">
   {{.CSRFField}}
-  <label>Email
-    <input name="email" type="email" value="{{.Email}}" required autofocus>
+  <label>{{.L.T "Email"}}
+    <input name="email" type="email" value="{{.Email}}" required autofocus autocomplete="username">
     {{with .Errors}}{{template "error" index . "email"}}{{end}}
   </label>
-  <label>Password
-    <input name="password" type="password" required>
+  <label>{{.L.T "Password"}}
+    <input name="password" type="password" required autocomplete="current-password">
     {{with .Errors}}{{template "error" index . "password"}}{{end}}
   </label>
-  <label class="check"><input type="checkbox" name="remember" value="1" {{if .Remember}}checked{{end}}> <span>Remember me <span class="muted">(30 days on this device)</span></span></label>
-  <button>Log in</button>
+  <label class="check"><input type="checkbox" name="remember" value="1" {{if .Remember}}checked{{end}}> <span>{{.L.T "Remember me"}} <span class="muted">{{.L.T "(30 days on this device)"}}</span></span></label>
+  <button>{{.L.T "Log in"}}</button>
 </form>
-<p>No account? <a href="/register">Register</a>.</p>
+<p>{{.L.T "No account?"}} <a href="/register">{{.L.T "Register"}}</a>.</p>
 {{end}}

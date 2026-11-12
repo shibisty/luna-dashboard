@@ -1,71 +1,71 @@
 {{define "title"}}{{.Entry.Name}} · {{.Application.Name}} · {{.App}}{{end}}
 {{define "content"}}
-<p><a href="{{.PagesURL}}/entries">← Entries of {{.Application.Name}}</a></p>
+<p><a href="{{.PagesURL}}/entries">← {{.L.T "Entries of %s" .Application.Name}}</a></p>
 <h1>{{.Entry.Name}}</h1>
-<p class="muted">{{with .Template.Name}}{{.}}{{else}}(template gone){{end}} · <span class="badge">{{.Entry.Status}}</span> · version {{.Entry.Version}}
-  · <a href="{{.PagesURL}}/preview?id={{.Entry.ID}}" target="_blank" rel="noopener">Preview</a></p>
+<p class="muted">{{with .Template.Name}}{{.}}{{else}}{{$.L.T "(template gone)"}}{{end}} · <span class="badge">{{.L.T .Entry.Status}}</span> · {{.L.T "version %d" .Entry.Version}}
+  · <a href="{{.PagesURL}}/preview?id={{.Entry.ID}}" target="_blank" rel="noopener">{{.L.T "Preview"}}</a></p>
 {{with .Notice}}<p class="error">{{.}}</p>{{end}}
-{{with .Errors}}<p class="error">Check the fields marked below.</p>{{end}}
+{{with .Errors}}<p class="error">{{$.L.T "Check the fields marked below."}}</p>{{end}}
 
 <form class="entry" method="post" action="{{.URL}}">
   {{.CSRFField}}
   <input type="hidden" name="version" value="{{.Entry.Version}}">
-  <label>Name
+  <label>{{.L.T "Name"}}
     <input name="name" value="{{.Entry.Name}}" maxlength="200" required>
     {{with .Errors}}{{template "error" index . "name"}}{{end}}
   </label>
-  <label>Slug
+  <label>{{.L.T "Slug"}}
     <input name="slug" value="{{.Entry.Slug}}" maxlength="255">
     {{with .Errors}}{{template "error" index . "slug"}}{{end}}
   </label>
-  {{range .Inputs}}{{template "field-input" .}}{{end}}
+  {{range .Inputs}}{{template "field-input" (dict "In" . "L" $.L)}}{{end}}
   <p class="actions">
-    <button>Save draft</button>
-    <button formaction="{{.URL}}/publish">Save and publish</button>
+    <button>{{.L.T "Save draft"}}</button>
+    <button formaction="{{.URL}}/publish">{{.L.T "Save and publish"}}</button>
   </p>
 </form>
 
-<form method="post" action="{{.URL}}/delete">{{.CSRFField}}<button class="danger">Delete the entry</button></form>
+<form method="post" action="{{.URL}}/delete">{{.CSRFField}}<button class="danger">{{.L.T "Delete the entry"}}</button></form>
 {{end}}
 
-{{define "field-input"}}
+{{define "field-input"}}{{$L := .L}}{{with .In}}
 {{if eq .Field.Type "list"}}
 <fieldset class="list">
-  <legend>{{.Field.Title}}{{if .Field.Required}} *{{end}} <span class="badge">list</span></legend>
-  {{with .Error}}<span class="error">{{.}}</span>{{end}}
+  <legend>{{.Field.Title}}{{if .Field.Required}} *{{end}} <span class="badge">{{$L.T "list"}}</span></legend>
+  {{with .Error}}<span class="error">{{$L.Msg .}}</span>{{end}}
   {{range .Items}}
   <fieldset class="item">
-    <legend>{{if .New}}New item <span class="muted">(left empty, it is not added)</span>{{else}}Item {{.Number}}{{end}}</legend>
-    {{range .Fields}}{{template "field-input" .}}{{end}}
-    {{if not .New}}<label class="check"><input type="checkbox" name="{{.Name}}.remove" value="1"> Remove this item</label>{{end}}
+    <legend>{{if .New}}{{$L.T "New item"}} <span class="muted">{{$L.T "(left empty, it is not added)"}}</span>{{else}}{{$L.T "Item %d" .Number}}{{end}}</legend>
+    {{range .Fields}}{{template "field-input" (dict "In" . "L" $L)}}{{end}}
+    {{if not .New}}<label class="check"><input type="checkbox" name="{{.Name}}.remove" value="1"> {{$L.T "Remove this item"}}</label>{{end}}
   </fieldset>
   {{end}}
 </fieldset>
 {{else if eq .Field.Type "boolean"}}
 <label class="check"><input type="checkbox" id="{{.ID}}" name="{{.Name}}" value="1" {{if .Checked}}checked{{end}}> {{.Field.Title}}</label>
-{{with .Error}}<span class="error">{{.}}</span>{{end}}
+{{with .Error}}<span class="error">{{$L.Msg .}}</span>{{end}}
 {{else if eq .Field.Type "image"}}
 <fieldset>
-  <legend>{{.Field.Title}}{{if .Field.Required}} *{{end}} <span class="badge">image</span></legend>
+  <legend>{{.Field.Title}}{{if .Field.Required}} *{{end}} <span class="badge">{{$L.T "image"}}</span></legend>
   <label>URL <input type="url" id="{{.ID}}" name="{{.Name}}.url" value="{{.URL}}" placeholder="https://…"></label>
-  <label>Alternative text <input name="{{.Name}}.alt" value="{{.Alt}}"></label>
-  {{with .Error}}<span class="error">{{.}}</span>{{end}}
+  <label>{{$L.T "Alternative text"}} <input name="{{.Name}}.alt" value="{{.Alt}}"></label>
+  {{with .Error}}<span class="error">{{$L.Msg .}}</span>{{end}}
 </fieldset>
 {{else if eq .Field.Type "link"}}
 <fieldset>
-  <legend>{{.Field.Title}}{{if .Field.Required}} *{{end}} <span class="badge">link</span></legend>
-  <label>URL <input id="{{.ID}}" name="{{.Name}}.url" value="{{.URL}}" placeholder="https://… or /page"></label>
-  <label>Text <span class="muted">empty keeps the template's</span> <input name="{{.Name}}.label" value="{{.Label}}"></label>
-  {{with .Error}}<span class="error">{{.}}</span>{{end}}
+  <legend>{{.Field.Title}}{{if .Field.Required}} *{{end}} <span class="badge">{{$L.T "link"}}</span></legend>
+  <label>URL <input id="{{.ID}}" name="{{.Name}}.url" value="{{.URL}}" placeholder="{{$L.T "https://… or /page"}}"></label>
+  <label><span>{{$L.T "Text"}} <span class="muted">{{$L.T "empty keeps the template's"}}</span></span> <input name="{{.Name}}.label" value="{{.Label}}"></label>
+  {{with .Error}}<span class="error">{{$L.Msg .}}</span>{{end}}
 </fieldset>
 {{else}}
-<label for="{{.ID}}"><span>{{.Field.Title}}{{if .Field.Required}} *{{end}} <span class="badge">{{.Field.Type}}</span></span>
+<label for="{{.ID}}"><span>{{.Field.Title}}{{if .Field.Required}} *{{end}} <span class="badge">{{$L.T .Field.Type}}</span></span>
   {{if eq .Field.Type "richtext"}}<textarea id="{{.ID}}" name="{{.Name}}" rows="5">{{.Value}}</textarea>
   {{else if eq .Field.Type "select"}}<select id="{{.ID}}" name="{{.Name}}"><option value="">—</option>{{$v := .Value}}{{range .Field.Options}}<option {{if eq . $v}}selected{{end}}>{{.}}</option>{{end}}</select>
   {{else if eq .Field.Type "number"}}<input id="{{.ID}}" name="{{.Name}}" value="{{.Value}}" inputmode="decimal">
   {{else if eq .Field.Type "date"}}<input type="date" id="{{.ID}}" name="{{.Name}}" value="{{.Value}}">
   {{else}}<input id="{{.ID}}" name="{{.Name}}" value="{{.Value}}" maxlength="1000">{{end}}
-  {{with .Error}}<span class="error">{{.}}</span>{{end}}
+  {{with .Error}}<span class="error">{{$L.Msg .}}</span>{{end}}
 </label>
 {{end}}
-{{end}}
+{{end}}{{end}}

@@ -1,56 +1,56 @@
 {{define "title"}}{{.Application.Name}} · {{.App}}{{end}}
 {{define "content"}}
-<p><a href="/apps">← Applications</a></p>
+<p><a href="/apps">← {{.L.T "Applications"}}</a></p>
 <h1>{{.Application.Name}}</h1>
-<p>App ID <code>{{.Application.PublicID}}</code></p>
-<p><a href="/apps/{{.Application.PublicID}}/users">Users and their data →</a></p>
-<p><a href="/apps/{{.Application.PublicID}}/pages">Pages: the site editor →</a> · <a href="/apps/{{.Application.PublicID}}/pages/entries">entry forms</a></p>
+<p>{{.L.T "App ID"}} <code>{{.Application.PublicID}}</code></p>
+<p><a href="/apps/{{.Application.PublicID}}/users">{{.L.T "Users and their data"}} →</a></p>
+<p><a href="/apps/{{.Application.PublicID}}/pages">{{.L.T "Pages: the site editor"}} →</a> · <a href="/apps/{{.Application.PublicID}}/pages/entries">{{.L.T "entry forms"}}</a></p>
 
-<h2>API keys</h2>
-<p><a href="/apps/{{.Application.PublicID}}/keys/new">Create a key</a></p>
+<h2>{{.L.T "API keys"}}</h2>
+<p><a href="/apps/{{.Application.PublicID}}/keys/new">{{.L.T "Create a key"}}</a></p>
 {{if .Keys}}
-<table>
-  <tr><th>Name</th><th>Key</th><th>Scopes</th><th>Last used</th><th></th></tr>
+<div class="table-wrap"><table>
+  <tr><th>{{.L.T "Name"}}</th><th>{{.L.T "Key"}}</th><th>{{.L.T "Scopes"}}</th><th>{{.L.T "Last used"}}</th><th></th></tr>
   {{range .Keys}}
   <tr>
-    <td>{{.Name}} <span class="badge">{{.Kind}}</span></td>
+    <td>{{.Name}} <span class="badge">{{$.L.T (print .Kind)}}</span></td>
     <td><code>{{.Hint}}</code></td>
     <td>{{range .Scopes}}<code>{{.}}</code> {{end}}
-      {{if .Origins}}<div class="muted">origins: {{range .Origins}}{{.}} {{end}}</div>{{end}}
-      {{if .IPs}}<div class="muted">networks: {{range .IPs}}{{.}} {{end}}</div>{{end}}
+      {{if .Origins}}<div class="muted">{{$.L.T "origins:"}} {{range .Origins}}{{.}} {{end}}</div>{{end}}
+      {{if .IPs}}<div class="muted">{{$.L.T "networks:"}} {{range .IPs}}{{.}} {{end}}</div>{{end}}
     </td>
-    <td class="muted">{{with .LastUsedAt}}{{.Format "2006-01-02 15:04"}}{{else}}never{{end}}</td>
+    <td class="muted">{{with .LastUsedAt}}{{.Format "2006-01-02 15:04"}}{{else}}{{$.L.T "never"}}{{end}}</td>
     <td>
       {{if .Active}}
-      <form method="post" action="/apps/{{$.Application.PublicID}}/keys/{{.PublicID}}/regenerate">{{$.CSRFField}}<button>New secret</button></form>
-      <form method="post" action="/apps/{{$.Application.PublicID}}/keys/{{.PublicID}}/revoke">{{$.CSRFField}}<button class="danger">Revoke</button></form>
-      {{else}}<span class="muted">revoked {{.RevokedAt.Format "2006-01-02"}}</span>{{end}}
+      <form method="post" action="/apps/{{$.Application.PublicID}}/keys/{{.PublicID}}/regenerate">{{$.CSRFField}}<button>{{$.L.T "New secret"}}</button></form>
+      <form method="post" action="/apps/{{$.Application.PublicID}}/keys/{{.PublicID}}/revoke">{{$.CSRFField}}<button class="danger">{{$.L.T "Revoke"}}</button></form>
+      {{else}}<span class="muted">{{$.L.T "revoked %s" (.RevokedAt.Format "2006-01-02")}}</span>{{end}}
     </td>
   </tr>
   {{end}}
-</table>
+</table></div>
 {{else}}
-<p class="muted">No keys yet.</p>
+<p class="muted">{{.L.T "No keys yet."}}</p>
 {{end}}
 
-<h2>Settings</h2>
+<h2>{{.L.T "Settings"}}</h2>
 <form class="card" method="post" action="/apps/{{.Application.PublicID}}">
   {{.CSRFField}}
-  <label>Name
+  <label>{{.L.T "Name"}}
     <input name="name" value="{{.Form.Name}}" maxlength="100" required>
     {{with .Errors}}{{template "error" index . "name"}}{{end}}
   </label>
-  <label>Password reset URL
+  <label>{{.L.T "Password reset URL"}}
     <input name="password_reset_url" type="url" value="{{.Form.PasswordResetURL}}" placeholder="https://app.example/reset-password">
     {{with .Errors}}{{template "error" index . "password_reset_url"}}{{end}}
   </label>
-  <button>Save</button>
+  <button>{{.L.T "Save"}}</button>
 </form>
 
-<h2 class="danger">Delete</h2>
+<h2 class="danger">{{.L.T "Delete"}}</h2>
 <form method="post" action="/apps/{{.Application.PublicID}}/delete">
   {{.CSRFField}}
-  <p class="muted">Deletes the application and all its keys; clients using them stop working within a minute.</p>
-  <button class="danger">Delete {{.Application.Name}}</button>
+  <p class="muted">{{.L.T "Deletes the application and all its keys; clients using them stop working within a minute."}}</p>
+  <button class="danger">{{.L.T "Delete %s" .Application.Name}}</button>
 </form>
 {{end}}

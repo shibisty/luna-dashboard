@@ -1,6 +1,6 @@
-{{define "title"}}Users · {{.Application.Name}} · {{.App}}{{end}}
+{{define "title"}}{{.L.T "Users"}} · {{.Application.Name}} · {{.App}}{{end}}
 {{define "content"}}
 <p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a></p>
-<h1>Users</h1>
+<h1>{{.L.T "Users"}}</h1>
 <p class="error">{{.Message}}</p>
 {{end}}

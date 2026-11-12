@@ -1,52 +1,52 @@
-{{define "title"}}Users · {{.Application.Name}} · {{.App}}{{end}}
+{{define "title"}}{{.L.T "Users"}} · {{.Application.Name}} · {{.App}}{{end}}
 {{define "content"}}
 <p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a></p>
-<h1>Users</h1>
-<p class="muted">The people who signed up in {{.Application.Name}} through luna-auth. Another application has its own users, even with the same email.</p>
+<h1>{{.L.T "Users"}}</h1>
+<p class="muted">{{.L.T "The people who signed up in %s through luna-auth. Another application has its own users, even with the same email." .Application.Name}}</p>
 
 <form class="search" method="get" action="/apps/{{.Application.PublicID}}/users">
-  <input name="q" value="{{.Query}}" placeholder="Search by email or username" aria-label="Search">
-  <button>Search</button>
-  {{if .Query}}<a href="/apps/{{.Application.PublicID}}/users">Clear</a>{{end}}
+  <input name="q" value="{{.Query}}" placeholder="{{.L.T "Search by email or username"}}" aria-label="{{.L.T "Search"}}">
+  <button>{{.L.T "Search"}}</button>
+  {{if .Query}}<a href="/apps/{{.Application.PublicID}}/users">{{.L.T "Clear"}}</a>{{end}}
 </form>
 
 {{if .Users.Data}}
-<table>
-  <tr><th>Email</th><th>Username</th><th>Verified</th><th>Signed up</th></tr>
+<div class="table-wrap"><table>
+  <tr><th>{{.L.T "Email"}}</th><th>{{.L.T "Username"}}</th><th>{{.L.T "Verified"}}</th><th>{{.L.T "Signed up"}}</th></tr>
   {{range .Users.Data}}
   <tr>
     <td><a href="/apps/{{$.Application.PublicID}}/users/{{.ID}}">{{.Email}}</a></td>
     <td>{{with .Username}}{{.}}{{else}}<span class="muted">—</span>{{end}}</td>
-    <td>{{if .EmailVerified}}yes{{else}}<span class="muted">no</span>{{end}}</td>
+    <td>{{if .EmailVerified}}{{$.L.T "yes"}}{{else}}<span class="muted">{{$.L.T "no"}}</span>{{end}}</td>
     <td class="muted">{{.CreatedAt.Format "2006-01-02 15:04"}}</td>
   </tr>
   {{end}}
-</table>
+</table></div>
 <p class="muted">
-  {{.Users.Total}} {{if eq .Users.Total 1}}user{{else}}users{{end}}{{if .Query}} found{{end}} · page {{.Users.Page}} of {{.Users.LastPage}}
-  {{with .PrevURL}} · <a href="{{.}}">← Newer</a>{{end}}
-  {{with .NextURL}} · <a href="{{.}}">Older →</a>{{end}}
+  {{if .Query}}{{.L.T "Found: %s" (.L.N .Users.Total "user")}}{{else}}{{.L.N .Users.Total "user"}}{{end}} · {{.L.T "page %d of %d" .Users.Page .Users.LastPage}}
+  {{with .PrevURL}} · <a href="{{.}}">← {{$.L.T "Newer"}}</a>{{end}}
+  {{with .NextURL}} · <a href="{{.}}">{{$.L.T "Older"}} →</a>{{end}}
 </p>
 {{else}}
-<p class="muted">{{if .Query}}No users match “{{.Query}}”.{{else}}No users yet.{{end}}</p>
+<p class="muted">{{if .Query}}{{.L.T "No users match “%s”." .Query}}{{else}}{{.L.T "No users yet."}}{{end}}</p>
 {{end}}
 
-<h2>Add a user</h2>
+<h2>{{.L.T "Add a user"}}</h2>
 <form class="card" method="post" action="/apps/{{.Application.PublicID}}/users">
   {{.CSRFField}}
-  <label>Email
+  <label>{{.L.T "Email"}}
     <input name="email" type="email" value="{{.Form.Email}}" maxlength="254" required>
     {{with .Errors}}{{template "error" index . "email"}}{{end}}
   </label>
-  <label>Username <span class="muted">optional</span>
+  <label><span>{{.L.T "Username"}} <span class="muted">{{.L.T "optional"}}</span></span>
     <input name="username" value="{{.Form.Username}}" maxlength="32">
     {{with .Errors}}{{template "error" index . "username"}}{{end}}
   </label>
-  <label>Password
+  <label>{{.L.T "Password"}}
     <input name="password" type="password" minlength="8" maxlength="200" required autocomplete="new-password">
     {{with .Errors}}{{template "error" index . "password"}}{{end}}
   </label>
-  <label class="check"><input type="checkbox" name="email_verified" value="1" {{if .Form.EmailVerified}}checked{{end}}> Email is verified</label>
-  <button>Add user</button>
+  <label class="check"><input type="checkbox" name="email_verified" value="1" {{if .Form.EmailVerified}}checked{{end}}> {{.L.T "Email is verified"}}</label>
+  <button>{{.L.T "Add user"}}</button>
 </form>
 {{end}}

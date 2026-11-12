@@ -47,6 +47,23 @@ signed in. Tokens rotate: one presented again after its minute of grace (paralle
 the whole login, as a stolen copy would. Logging out revokes it. The grace is per process: with
 several dashboard replicas keep sessions sticky.
 
+## Look and language
+
+The pages follow Material UI's look (an AppBar, Paper cards, contained buttons, outlined fields),
+written as plain CSS in `resources/views/layouts/app.html` with the palette in
+`partials/theme.html`; the editor's `luna-theme.css` uses the same palette. The theme is light,
+dark, or the system's (`prefers-color-scheme`), and the dashboard speaks English or Russian. The
+switches in the bar go through `GET /prefs?lang=&theme=&back=`, which keeps the choice for a year
+in the `luna_lang` and `luna_theme` cookies; without them the language comes from the browser's
+`Accept-Language` and the theme from the system.
+
+Templates are written in English and translate with `{{.L.T "Text"}}` (`{{.L.H …}}` for text with
+markup, `{{.L.N 3 "user"}}` for counts); `app/locale/ru.go` is the Russian catalogue, and a test
+fails when a template's text has no translation there. Validation messages and the services'
+errors are translated by pattern (`The {field} field is required.`), field names by their
+`field:` keys. The editor gets GrapesJS' Russian locale, Russian block labels and button
+tooltips; plugins without a Russian locale stay English.
+
 ## The site editor
 
 `/apps/{app}/pages` is GrapesJS 0.23 with

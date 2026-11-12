@@ -27,6 +27,7 @@ func Web(app *fullstack.App, au *auth.Auth, keeper *sessions.Keeper) {
 		r.Use(keeper.Renew(), au.Web(), au.CSRF())
 		r.Get("/", home.Index).Name("home")
 		r.Get("/dashboard", home.Dashboard, au.Require()).Name("dashboard")
+		r.Get("/prefs", controllers.Prefs).Name("prefs")
 
 		r.Get("/login", login.ShowLogin, au.Guest()).Name("login")
 		r.Post("/login", login.Login, au.Guest(), au.Throttle(5, time.Minute))

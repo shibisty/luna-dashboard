@@ -1,9 +1,9 @@
-{{define "title"}}Applications · {{.App}}{{end}}
+{{define "title"}}{{.L.T "Applications"}} · {{.App}}{{end}}
 {{define "content"}}
-<h1>Applications</h1>
+<h1>{{.L.T "Applications"}}</h1>
 {{if .Apps}}
-<table>
-  <tr><th>Name</th><th>App ID</th><th>Created</th></tr>
+<div class="table-wrap"><table>
+  <tr><th>{{.L.T "Name"}}</th><th>{{.L.T "App ID"}}</th><th>{{.L.T "Created"}}</th></tr>
   {{range .Apps}}
   <tr>
     <td><a href="/apps/{{.PublicID}}">{{.Name}}</a></td>
@@ -11,22 +11,22 @@
     <td class="muted">{{.CreatedAt.Format "2006-01-02"}}</td>
   </tr>
   {{end}}
-</table>
+</table></div>
 {{else}}
-<p class="muted">No applications yet. An application is a site, a service or an app that will call Luna; its keys belong to it.</p>
+<p class="muted">{{.L.T "No applications yet. An application is a site, a service or an app that will call Luna; its keys belong to it."}}</p>
 {{end}}
 
-<h2>New application</h2>
+<h2>{{.L.T "New application"}}</h2>
 <form class="card" method="post" action="/apps">
   {{.CSRFField}}
-  <label>Name
+  <label>{{.L.T "Name"}}
     <input name="name" value="{{.Form.Name}}" maxlength="100" required>
     {{with .Errors}}{{template "error" index . "name"}}{{end}}
   </label>
-  <label>Password reset URL <span class="muted">optional: where reset emails send your users</span>
+  <label><span>{{.L.T "Password reset URL"}} <span class="muted">{{.L.T "optional: where reset emails send your users"}}</span></span>
     <input name="password_reset_url" type="url" value="{{.Form.PasswordResetURL}}" placeholder="https://app.example/reset-password">
     {{with .Errors}}{{template "error" index . "password_reset_url"}}{{end}}
   </label>
-  <button>Create application</button>
+  <button>{{.L.T "Create application"}}</button>
 </form>
 {{end}}

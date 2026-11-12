@@ -85,6 +85,13 @@
       "sha256": "e3ee96f3762c1ad4f7efe5fdc82a1fcd0fc5cd7006cb31d5e47e5bcaef054684"
     },
     {
+      "file": "grapesjs-locale-ru.js",
+      "package": "grapesjs",
+      "version": "0.23.9",
+      "source": "npm grapesjs locale/ru.js, wrapped for a <script> tag (see README)",
+      "sha256": "0d90514ed9ad201f6fe783b0aad4ae0494aca05739794eb08518e5fa91006fe3"
+    },
+    {
       "file": "grapesjs-navbar.js",
       "package": "grapesjs-navbar",
       "version": "1.0.2",
@@ -201,7 +208,7 @@
       "package": "luna-theme",
       "version": "1.0.0",
       "source": "ours: Luna's theme for GrapesJS (light, after MUI)",
-      "sha256": "d8afbe6fe934467b48cd85aa938041783795bc31db31a7a607d478d311655b56"
+      "sha256": "9a7af98b5d7760280929452becbefbe444771884c447919f475c5673209f4e38"
     },
     {
       "file": "microsoft-callback.html",

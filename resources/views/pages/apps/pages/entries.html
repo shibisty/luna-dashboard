@@ -1,54 +1,54 @@
-{{define "title"}}Entries · {{.Application.Name}} · {{.App}}{{end}}
+{{define "title"}}{{.L.T "Entries"}} · {{.Application.Name}} · {{.App}}{{end}}
 {{define "content"}}
-<p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a> · <a href="{{.URL}}">Open the page editor</a></p>
-<h1>Entries</h1>
-<p class="muted">Quick forms for the entries of {{.Application.Name}}'s templates, without the canvas. Templates and their fields are made in the page editor (Content panel).</p>
+<p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a> · <a href="{{.URL}}">{{.L.T "Open the page editor"}}</a></p>
+<h1>{{.L.T "Entries"}}</h1>
+<p class="muted">{{.L.T "Quick forms for the entries of %s's templates, without the canvas. Templates and their fields are made in the page editor (Content panel)." .Application.Name}}</p>
 
 {{range .Groups}}
 <h2>{{.Template.Name}}</h2>
 {{if .Template.Fields}}
-<p class="muted">Fields: {{range $i, $f := .Template.Fields}}{{if $i}}, {{end}}{{$f.Title}} <span class="badge">{{$f.Type}}</span>{{end}}</p>
+<p class="muted">{{$.L.T "Fields:"}} {{range $i, $f := .Template.Fields}}{{if $i}}, {{end}}{{$f.Title}} <span class="badge">{{$.L.T $f.Type}}</span>{{end}}</p>
 {{else}}
-<p class="muted">This template has no fields yet: mark some in the page editor.</p>
+<p class="muted">{{$.L.T "This template has no fields yet: mark some in the page editor."}}</p>
 {{end}}
 {{if .Entries}}
-<table>
-  <tr><th>Name</th><th>Slug</th><th>Status</th><th>Changed</th></tr>
+<div class="table-wrap"><table>
+  <tr><th>{{$.L.T "Name"}}</th><th>{{$.L.T "Slug"}}</th><th>{{$.L.T "Status"}}</th><th>{{$.L.T "Changed"}}</th></tr>
   {{range .Entries}}
   <tr>
     <td><a href="{{$.URL}}/entries/{{.ID}}">{{.Name}}</a></td>
     <td><code>{{.Slug}}</code></td>
-    <td><span class="badge">{{.Status}}</span></td>
+    <td><span class="badge">{{$.L.T .Status}}</span></td>
     <td class="muted">{{.UpdatedAt.Format "2006-01-02 15:04"}}</td>
   </tr>
   {{end}}
-</table>
+</table></div>
 {{else}}
-<p class="muted">No entries yet.</p>
+<p class="muted">{{$.L.T "No entries yet."}}</p>
 {{end}}
 {{else}}
-<p class="muted">No templates yet. Make one in the page editor: a template is a design whose elements are marked as fields (Product: title, price, photo…); its entries are only values.</p>
+<p class="muted">{{.L.T "No templates yet. Make one in the page editor: a template is a design whose elements are marked as fields (Product: title, price, photo…); its entries are only values."}}</p>
 {{end}}
 
 {{if .Groups}}
-<h2>New entry</h2>
+<h2>{{.L.T "New entry"}}</h2>
 <form class="card" method="post" action="{{.URL}}/entries">
   {{.CSRFField}}
-  <label>Template
+  <label>{{.L.T "Template"}}
     <select name="template" required>
       {{range .Groups}}<option value="{{.Template.ID}}" {{if eq .Template.ID $.Form.Template}}selected{{end}}>{{.Template.Name}}</option>{{end}}
     </select>
     {{with .Errors}}{{template "error" index . "template"}}{{end}}
   </label>
-  <label>Name
+  <label>{{.L.T "Name"}}
     <input name="name" value="{{.Form.Name}}" maxlength="200" required>
     {{with .Errors}}{{template "error" index . "name"}}{{end}}
   </label>
-  <label>Slug <span class="muted">optional, made from the name: /products/coffee-grinder</span>
+  <label><span>{{.L.T "Slug"}} <span class="muted">{{.L.T "optional, made from the name: /products/coffee-grinder"}}</span></span>
     <input name="slug" value="{{.Form.Slug}}" maxlength="255" placeholder="/products/coffee-grinder">
     {{with .Errors}}{{template "error" index . "slug"}}{{end}}
   </label>
-  <button>Create</button>
+  <button>{{.L.T "Create"}}</button>
 </form>
 {{end}}
 {{end}}

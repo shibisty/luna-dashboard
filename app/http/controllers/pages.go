@@ -17,6 +17,7 @@ import (
 	"fullstack-validation"
 	"fullstack/web"
 
+	"luna-dashboard/app/locale"
 	"luna-dashboard/app/models"
 	"luna-dashboard/app/pagesapi"
 )
@@ -57,12 +58,51 @@ func (h Pages) unavailable(c *web.Ctx, a *models.Application, err error) error {
 
 /* ---------------- the editor ---------------- */
 
+// blockLabels are the plugins' block labels and categories as they name
+// them; the editor shows them through the dashboard's catalogue.
+var blockLabels = []string{
+	"Basic", "Forms", "forms", "Extra", "Storage",
+	"Link Block", "Quote", "Text section", "1 Column", "2 Columns", "3 Columns", "2 Columns 3/7",
+	"Text", "Link", "Image", "Video", "Map",
+	"Form", "Input", "Textarea", "Select", "Button", "Checkbox", "Radio",
+	"Navbar", "Tabs", "Countdown", "Custom Code", "Tooltip", "Typed", "My files",
+}
+
+// buttonTitles are tooltips for the panel buttons, by command id.
+var buttonTitles = map[string]string{
+	"set-device-desktop": "Desktop", "set-device-tablet": "Tablet", "set-device-mobile": "Mobile",
+	"sw-visibility": "Show element borders", "preview": "Preview the design", "fullscreen": "Full screen",
+	"export-template": "View code", "undo": "Undo", "redo": "Redo", "gjs-open-import-webpage": "Import HTML",
+	"canvas-clear": "Clear the canvas", "gca-open-picker-btn": "Insert from cloud", "export-jsx": "Export as React (JSX)",
+	"open-sm": "Styles", "open-tm": "Settings of the element", "open-layers": "Layers", "open-blocks": "Blocks",
+	"pages-manager": "Pages", "content-storage": "Content",
+}
+
+func editorLabels(l *locale.Lang) map[string]string {
+	out := map[string]string{}
+	for _, s := range blockLabels {
+		if t := l.T(s); t != s {
+			out[s] = t
+		}
+	}
+	return out
+}
+
+func editorTitles(l *locale.Lang) map[string]string {
+	out := make(map[string]string, len(buttonTitles))
+	for id, s := range buttonTitles {
+		out[id] = l.T(s)
+	}
+	return out
+}
+
 // editorScripts are the bundle's scripts in load order: GrapesJS, the
 // official plugins, ours (the stand's set, C:\OSPanel6\home\grapesjs,
 // without the plugins manager). grapesjs-pages comes before
 // grapesjs-storage, which then leaves the templates' designs to it.
 var editorScripts = []string{
 	"grapes.min.js",
+	"grapesjs-locale-ru.js",
 	"grapesjs-preset-webpage.js",
 	"grapesjs-blocks-basic.js",
 	"grapesjs-plugin-forms.js",
@@ -117,8 +157,15 @@ func (h Pages) Editor(c *web.Ctx) error {
 		}
 		return out
 	}
+	l := locale.Detect(c.R)
 	cfg, err := json.Marshal(map[string]any{
-		"app":      a.PublicID,
+		"app":  a.PublicID,
+		"lang": l.Code(),
+		// The plugins' block labels and categories, and titles for the
+		// panel buttons, in the dashboard's language (GrapesJS' own
+		// locale covers the rest; plugins without one stay English).
+		"labels":   editorLabels(l),
+		"titles":   editorTitles(l),
 		"name":     a.Name,
 		"api":      pagesURL(a) + "/api",
 		"pages":    pagesURL(a),

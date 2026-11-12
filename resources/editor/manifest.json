@@ -197,11 +197,46 @@
       "sha256": "326c23e018693a03f0636286aa7b419e27eaa3a6e94e4aceef62e94332229563"
     },
     {
+      "file": "luna-theme.css",
+      "package": "luna-theme",
+      "version": "1.0.0",
+      "source": "ours: Luna's theme for GrapesJS (light, after MUI)",
+      "sha256": "d8afbe6fe934467b48cd85aa938041783795bc31db31a7a607d478d311655b56"
+    },
+    {
       "file": "microsoft-callback.html",
       "package": "grapesjs-cloud-assets",
       "version": "0.9.0",
       "source": "github.com/shibisty/grapes-cloud (public/)",
       "sha256": "d34e2dcbc7dd2dafc8b3c0db00edd60e6a0857014490500a34d632b62f98da1a"
+    },
+    {
+      "file": "roboto-cyrillic-400-normal.woff2",
+      "package": "@fontsource/roboto",
+      "version": "5.3.0",
+      "source": "npm (files/)",
+      "sha256": "fe349e5377e88095a1b04b615bf5e745f1899556545383c348a007aab628815e"
+    },
+    {
+      "file": "roboto-cyrillic-500-normal.woff2",
+      "package": "@fontsource/roboto",
+      "version": "5.3.0",
+      "source": "npm (files/)",
+      "sha256": "0991339551f58fb49d106c4b2a2beaf403823c0cdd0ed99d1a38f1a8b20d1595"
+    },
+    {
+      "file": "roboto-latin-400-normal.woff2",
+      "package": "@fontsource/roboto",
+      "version": "5.3.0",
+      "source": "npm (files/)",
+      "sha256": "425c0713a8176f92273d378599c7eac57de7fafabd4bd0ed457b70eb8f80d371"
+    },
+    {
+      "file": "roboto-latin-500-normal.woff2",
+      "package": "@fontsource/roboto",
+      "version": "5.3.0",
+      "source": "npm (files/)",
+      "sha256": "5bcc3aa180e7f26f643cd5b2621cd7c2de193d0661d913a94afd3d4881a7a34b"
     },
     {
       "file": "tui-code-snippet.min.js",

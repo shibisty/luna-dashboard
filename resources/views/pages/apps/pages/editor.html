@@ -8,17 +8,18 @@
   {{end}}
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; }
-    body { display: flex; flex-direction: column; font: 14px/1.4 system-ui, sans-serif; }
-    .luna-bar { display: flex; gap: 1rem; align-items: center; padding: 0 .75rem; height: 40px; flex: none;
-      background: #1f2937; color: #e5e7eb; }
-    .luna-bar a, .luna-bar button { color: #e5e7eb; text-decoration: none; background: none; border: 1px solid #4b5563;
-      border-radius: 4px; padding: .2rem .6rem; font: inherit; cursor: pointer; }
-    .luna-bar a.back { border: 0; padding-left: 0; }
-    .luna-bar a:hover, .luna-bar button:hover { background: #374151; }
-    .luna-bar .title { font-weight: 600; }
+    body { display: flex; flex-direction: column; font: 14px/1.5 var(--luna-font, Roboto, Arial, sans-serif); background: var(--luna-bg, #f5f5f5); }
+    /* MUI's AppBar: primary, dense. */
+    .luna-bar { display: flex; gap: 8px; align-items: center; padding: 0 12px 0 8px; height: 48px; flex: none; position: relative; z-index: 2;
+      background: var(--luna-primary, #1976d2); color: #fff; box-shadow: var(--luna-shadow-4); }
+    .luna-bar a, .luna-bar button { color: #fff; text-decoration: none; background: none; border: 1px solid rgba(255,255,255,.5);
+      border-radius: 4px; padding: 4px 12px; font: 500 13px/1.75 inherit; letter-spacing: .02em; text-transform: uppercase; cursor: pointer; }
+    .luna-bar a.back { border: 0; text-transform: none; font-size: 14px; padding: 6px 10px; }
+    .luna-bar a:hover, .luna-bar button:hover { background: rgba(255,255,255,.12); border-color: #fff; }
+    .luna-bar .title { font-size: 18px; font-weight: 500; letter-spacing: .0075em; }
     .luna-bar .spacer { flex: 1; }
-    .luna-bar .status { color: #9ca3af; font-size: 12px; max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .luna-bar .status.error { color: #fca5a5; }
+    .luna-bar .status { color: rgba(255,255,255,.75); font-size: 12px; max-width: 48ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .luna-bar .status.error { color: #ffcdd2; }
     #gjs { flex: 1; min-height: 0; }
   </style>
 </head>
@@ -104,7 +105,8 @@
       ],
       pluginsOpts: {
         // No jumping to the style manager on every selection: the Pages and Content panels stay open.
-        'grapesjs-preset-webpage': { blocks: ['link-block', 'quote', 'text-basic'], showStylesOnChange: false },
+        // Luna's theme (luna-theme.css), not the preset's colors.
+        'grapesjs-preset-webpage': { blocks: ['link-block', 'quote', 'text-basic'], showStylesOnChange: false, useCustomTheme: false },
         'gjs-blocks-basic': { flexGrid: true },
         'grapesjs-plugin-forms': { blocks: ['form', 'input', 'textarea', 'select', 'checkbox', 'radio', 'button'] },
         'grapesjs-plugin-export': { btnLabel: 'Export ZIP' },
@@ -121,6 +123,10 @@
       }
     });
     window.editor = editor;
+    // Plugins add their CSS as they start: the theme goes after it.
+    editor.onReady(function () {
+      document.querySelectorAll('link[href*="luna-theme.css"]').forEach(function (l) { document.head.appendChild(l); });
+    });
 
     // What the plugins report, in the bar.
     var words = { saving: 'Saving…', offline: 'Offline: changes wait in this browser and go out when luna-pages is back.',

@@ -1,0 +1,272 @@
+/*
+ * Luna's theme for GrapesJS: light, after Material UI (MUI's default
+ * palette, Roboto, 4/8px radii, its elevations), with sizes in pixels so
+ * the panels look the same on a 4K screen as on a laptop.
+ *
+ * It sets GrapesJS' own variables first, then restyles what the variables
+ * do not reach: the panels, blocks, fields, the canvas' frame, modals, the
+ * rich text toolbar, and the plugins whose CSS assumes the dark theme.
+ * Load it after grapes.min.css and the plugins' CSS.
+ */
+
+@font-face { font-family: 'Roboto'; font-style: normal; font-display: swap; font-weight: 400;
+  src: url('roboto-cyrillic-400-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: 'Roboto'; font-style: normal; font-display: swap; font-weight: 400;
+  src: url('roboto-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Roboto'; font-style: normal; font-display: swap; font-weight: 500;
+  src: url('roboto-cyrillic-500-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: 'Roboto'; font-style: normal; font-display: swap; font-weight: 500;
+  src: url('roboto-latin-500-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+:root {
+  /* MUI's palette */
+  --luna-primary: #1976d2;
+  --luna-primary-dark: #1565c0;
+  --luna-primary-soft: rgba(25, 118, 210, 0.08);
+  --luna-primary-softer: rgba(25, 118, 210, 0.04);
+  --luna-text: rgba(0, 0, 0, 0.87);
+  --luna-text-2: rgba(0, 0, 0, 0.6);
+  --luna-text-3: rgba(0, 0, 0, 0.38);
+  --luna-divider: rgba(0, 0, 0, 0.12);
+  --luna-border: rgba(0, 0, 0, 0.23);
+  --luna-hover: rgba(0, 0, 0, 0.04);
+  --luna-paper: #fff;
+  --luna-bg: #f5f5f5;
+  --luna-canvas: #eceff1;
+  --luna-error: #d32f2f;
+  --luna-warning: #ed6c02;
+  --luna-success: #2e7d32;
+  --luna-radius: 4px;
+  --luna-radius-lg: 8px;
+  --luna-shadow-1: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+  --luna-shadow-4: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12);
+  --luna-shadow-8: 0 5px 5px -3px rgba(0,0,0,.2), 0 8px 10px 1px rgba(0,0,0,.14), 0 3px 14px 2px rgba(0,0,0,.12);
+  --luna-shadow-24: 0 11px 15px -7px rgba(0,0,0,.2), 0 24px 38px 3px rgba(0,0,0,.14), 0 9px 46px 8px rgba(0,0,0,.12);
+  --luna-font: Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --luna-sidebar: 320px;
+
+  /* GrapesJS' variables */
+  --gjs-main-font: var(--luna-font);
+  --gjs-font-size: 13px;
+  --gjs-primary-color: var(--luna-paper);
+  --gjs-secondary-color: var(--luna-text);
+  --gjs-tertiary-color: var(--luna-primary);
+  --gjs-quaternary-color: var(--luna-primary);
+  --gjs-main-color: var(--luna-paper);
+  --gjs-font-color: var(--luna-text);
+  --gjs-font-color-active: var(--luna-primary);
+  --gjs-main-dark-color: rgba(0, 0, 0, 0.04);
+  --gjs-secondary-dark-color: rgba(0, 0, 0, 0.06);
+  --gjs-main-light-color: rgba(0, 0, 0, 0.04);
+  --gjs-secondary-light-color: var(--luna-text-2);
+  --gjs-soft-light-color: rgba(0, 0, 0, 0.02);
+  --gjs-light-border: var(--luna-divider);
+  --gjs-arrow-color: var(--luna-text-2);
+  --gjs-dark-text-shadow: transparent;
+  --gjs-color-blue: var(--luna-primary);
+  --gjs-color-highlight: var(--luna-primary);
+  --gjs-color-red: var(--luna-error);
+  --gjs-color-green: var(--luna-success);
+  --gjs-color-yellow: var(--luna-warning);
+  --gjs-color-warn: var(--luna-warning);
+  --gjs-left-width: var(--luna-sidebar);
+  --gjs-canvas-top: 48px;
+}
+
+.gjs-editor, .gjs-editor-cont { font-family: var(--luna-font); color: var(--luna-text); background: var(--luna-bg); }
+.gjs-one-bg { background-color: var(--luna-paper); }
+.gjs-two-color { color: var(--luna-text); }
+.gjs-three-bg { background-color: var(--luna-primary); color: #fff; }
+.gjs-four-color, .gjs-four-color-h:hover { color: var(--luna-primary); }
+
+/* ---------- panels and buttons ---------- */
+
+.gjs-pn-panel { box-shadow: none; }
+.gjs-pn-commands, .gjs-pn-options, .gjs-pn-devices-c, .gjs-pn-views {
+  height: var(--gjs-canvas-top); padding: 0 8px; display: flex; align-items: center; gap: 2px;
+  background: var(--luna-paper); border-bottom: 1px solid var(--luna-divider); box-sizing: border-box;
+}
+.gjs-pn-commands { box-shadow: none; }
+.gjs-pn-views { border-left: 1px solid var(--luna-divider); justify-content: space-between; }
+.gjs-pn-options { right: var(--gjs-left-width); }
+.gjs-pn-buttons { gap: 2px; align-items: center; }
+.gjs-pn-btn {
+  width: 36px; height: 36px; min-height: 0; margin: 0; padding: 0; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 18px; line-height: 1; border-radius: 50%; color: var(--luna-text-2);
+  transition: background-color .15s, color .15s;
+}
+.gjs-pn-btn:hover { background: var(--luna-hover); color: var(--luna-text); }
+.gjs-pn-btn.gjs-pn-active { background: var(--luna-primary-soft); color: var(--luna-primary); box-shadow: none; }
+.gjs-pn-btn svg { width: 20px; height: 20px; fill: currentColor; }
+.gjs-pn-views .gjs-pn-btn { border-radius: var(--luna-radius); width: 40px; }
+.gjs-pn-views .gjs-pn-btn.gjs-pn-active { box-shadow: inset 0 -2px 0 var(--luna-primary); border-radius: var(--luna-radius) var(--luna-radius) 0 0; }
+
+.gjs-pn-views-container {
+  top: 0; padding-top: var(--gjs-canvas-top); box-sizing: border-box;
+  background: var(--luna-paper); border-left: 1px solid var(--luna-divider); box-shadow: none;
+}
+.gjs-cv-canvas { top: var(--gjs-canvas-top); height: calc(100% - var(--gjs-canvas-top)); background: var(--luna-canvas); }
+.gjs-frame-wrapper { box-shadow: var(--luna-shadow-1); }
+
+/* ---------- blocks: a grid of fixed-size tiles ---------- */
+
+.gjs-blocks-c {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px;
+  padding: 8px 12px 12px; justify-content: stretch;
+}
+.gjs-block {
+  width: auto; min-height: 76px; height: auto; margin: 0; padding: 10px 6px 8px; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  background: var(--luna-paper); color: var(--luna-text-2); border: 1px solid var(--luna-divider);
+  border-radius: var(--luna-radius-lg); box-shadow: none; transition: border-color .15s, box-shadow .15s, color .15s;
+}
+.gjs-block:hover { color: var(--luna-primary); border-color: var(--luna-primary); box-shadow: var(--luna-shadow-1); }
+.gjs-block__media { margin: 0; display: flex; align-items: center; justify-content: center; height: 32px; }
+.gjs-block svg, .gjs-block__media svg { width: 30px; height: 30px; max-width: 30px; max-height: 30px; fill: currentColor; }
+.gjs-block__media > img { max-width: 40px; max-height: 32px; }
+.gjs-block-label { font-size: 12px; line-height: 1.25; text-align: center; color: inherit; }
+.gjs-block-category .gjs-title, .gjs-sm-sector .gjs-sm-sector-title, .gjs-trt-header, .gjs-layer-title-c .gjs-title {
+  background: transparent; border-bottom: 1px solid var(--luna-divider);
+}
+.gjs-block-category .gjs-title, .gjs-sm-sector-title {
+  padding: 12px 16px; font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--luna-text-2); letter-spacing: .06em;
+}
+.gjs-block-category.gjs-open, .gjs-sm-sector.gjs-sm-open { border-bottom: 1px solid var(--luna-divider); }
+.gjs-title:hover, .gjs-sm-sector-title:hover { background: var(--luna-hover); }
+
+/* ---------- style manager, traits, fields ---------- */
+
+.gjs-sm-sector .gjs-sm-properties { padding: 8px 12px 12px; }
+.gjs-sm-property, .gjs-trt-trait { color: var(--luna-text); }
+.gjs-sm-label, .gjs-label, .gjs-trt-trait .gjs-label-wrp { color: var(--luna-text-2); font-size: 12px; }
+.gjs-field, .gjs-field-integer, .gjs-field-select, .gjs-input-holder, .gjs-clm-tags .gjs-field {
+  background: var(--luna-paper); color: var(--luna-text); border: 1px solid var(--luna-border);
+  border-radius: var(--luna-radius); box-shadow: none;
+}
+.gjs-field:hover { border-color: var(--luna-text); }
+.gjs-field:focus-within { border-color: var(--luna-primary); box-shadow: 0 0 0 1px var(--luna-primary); }
+.gjs-field input, .gjs-field select, .gjs-field textarea { color: var(--luna-text); font-family: var(--luna-font); font-size: 13px; }
+.gjs-field-arrows { color: var(--luna-text-2); }
+.gjs-field-arrow-u { border-bottom-color: var(--luna-text-2); }
+.gjs-field-arrow-d { border-top-color: var(--luna-text-2); }
+.gjs-field-units select, .gjs-input-unit { color: var(--luna-text-2); }
+.gjs-radio-item { border-color: var(--luna-divider); }
+.gjs-radio-items { border: 1px solid var(--luna-border); border-radius: var(--luna-radius); overflow: hidden; }
+.gjs-radio-item input:checked + .gjs-radio-item-label { background: var(--luna-primary-soft); color: var(--luna-primary); }
+.gjs-radio-item-label { color: var(--luna-text-2); }
+.gjs-sm-composite, .gjs-sm-stack .gjs-sm-layers, .gjs-sm-layer { background: var(--luna-bg); border-radius: var(--luna-radius); }
+.gjs-sm-layer.gjs-sm-active { background: var(--luna-primary-soft); }
+.gjs-sm-btn, .gjs-sm-add, .gjs-btn-prim {
+  background: var(--luna-primary); color: #fff; border: 0; border-radius: var(--luna-radius);
+  padding: 6px 16px; font: 500 13px/1.75 var(--luna-font); letter-spacing: .02em; text-transform: uppercase; box-shadow: var(--luna-shadow-1);
+}
+.gjs-btn-prim:hover, .gjs-sm-btn:hover { background: var(--luna-primary-dark); }
+.gjs-sm-clear, .gjs-sm-icon { color: var(--luna-text-2); }
+.gjs-field-colorp-c { border-radius: 3px; }
+
+/* class manager */
+.gjs-clm-tags { padding: 8px 12px; }
+.gjs-clm-tag { background: var(--luna-primary-soft); color: var(--luna-primary); border-radius: 16px; padding: 3px 10px; }
+.gjs-clm-tags-btn { background: var(--luna-hover); border-radius: var(--luna-radius); }
+.gjs-clm-sels-info, .gjs-clm-header-label, .gjs-clm-select { color: var(--luna-text-2); }
+
+/* layers */
+.gjs-layer { background: transparent; color: var(--luna-text); }
+.gjs-layer-item { border-bottom: 1px solid rgba(0, 0, 0, .06); padding-top: 6px; padding-bottom: 6px; }
+.gjs-layer-item:hover { background: var(--luna-hover); }
+.gjs-layer.gjs-selected > .gjs-layer-item, .gjs-layer.gjs-selected .gjs-layer-item { background: var(--luna-primary-soft); color: var(--luna-primary); }
+.gjs-layer-hovered > .gjs-layer-item { background: var(--luna-hover); }
+.gjs-layer-count { color: var(--luna-text-3); }
+.gjs-layer-move, .gjs-layer-vis, .gjs-layer-caret { color: var(--luna-text-2); }
+
+/* ---------- canvas helpers ---------- */
+
+.gjs-toolbar { background: var(--luna-primary); border-radius: var(--luna-radius); box-shadow: var(--luna-shadow-4); }
+.gjs-toolbar-item { color: #fff; }
+.gjs-badge { background: var(--luna-primary); color: #fff; border-radius: var(--luna-radius); font-family: var(--luna-font); box-shadow: var(--luna-shadow-1); }
+.gjs-selected { outline-color: var(--luna-primary) !important; }
+.gjs-hovered, .gjs-highlighter { outline-color: rgba(25, 118, 210, .5) !important; }
+.gjs-placeholder { border-color: var(--luna-primary) transparent; }
+.gjs-placeholder-int { background-color: var(--luna-primary); }
+.gjs-resizer-h { border-color: var(--luna-primary); background: #fff; }
+.gjs-offset-v, .gjs-offset-fixed-v { background-color: rgba(25, 118, 210, .12); }
+.gjs-padding-v-el, .gjs-padding-fixed-v { background-color: rgba(46, 125, 50, .15); }
+
+/* rich text toolbar */
+.gjs-rte-toolbar { background: var(--luna-paper); border: 0; border-radius: var(--luna-radius); box-shadow: var(--luna-shadow-8); padding: 2px; }
+.gjs-rte-actionbar { gap: 2px; }
+.gjs-rte-action {
+  color: var(--luna-text-2); border: 0; border-radius: var(--luna-radius);
+  min-width: 30px; height: 30px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.gjs-rte-action:hover { background: var(--luna-hover); color: var(--luna-text); }
+.gjs-rte-active { background: var(--luna-primary-soft); color: var(--luna-primary); }
+
+/* ---------- modals, asset manager, code viewer ---------- */
+
+.gjs-mdl-container { background-color: rgba(0, 0, 0, .5); }
+.gjs-mdl-dialog {
+  background: var(--luna-paper); color: var(--luna-text); border: 0; border-radius: var(--luna-radius-lg);
+  box-shadow: var(--luna-shadow-24); overflow: hidden;
+}
+.gjs-mdl-header { padding: 16px 24px; border-bottom: 1px solid var(--luna-divider); }
+.gjs-mdl-title { font: 500 18px/1.6 var(--luna-font); letter-spacing: .0075em; }
+.gjs-mdl-btn-close { color: var(--luna-text-2); font-size: 22px; }
+.gjs-mdl-content { padding: 16px 24px 24px; border-top: 0; }
+.gjs-am-assets-cont, .gjs-am-add-asset, .gjs-am-assets { background: var(--luna-bg); border-radius: var(--luna-radius); }
+.gjs-am-file-uploader > form { background: var(--luna-bg); border: 2px dashed var(--luna-border); border-radius: var(--luna-radius-lg); color: var(--luna-text-2); }
+.gjs-am-asset { border-bottom: 1px solid var(--luna-divider); }
+.gjs-am-meta, .gjs-am-name { color: var(--luna-text-2); }
+.gjs-am-add-asset .gjs-am-add-field { background: var(--luna-paper); border: 1px solid var(--luna-border); border-radius: var(--luna-radius); }
+.gjs-cm-editor-c { border-radius: var(--luna-radius); overflow: hidden; }
+.gjs-cm-editor #gjs-cm-title { background: var(--luna-bg); color: var(--luna-text-2); border-bottom: 1px solid var(--luna-divider); }
+.gjs-cm-editor { background: #263238; }
+
+/* ---------- scrollbars ---------- */
+
+.gjs-editor ::-webkit-scrollbar { width: 10px; height: 10px; }
+.gjs-editor ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .2); border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+.gjs-editor ::-webkit-scrollbar-track { background: transparent; }
+.gjs-editor * { scrollbar-color: rgba(0, 0, 0, .25) transparent; scrollbar-width: thin; }
+
+/* ---------- plugins written for the dark theme ---------- */
+
+/* grapesjs-pages and grapesjs-storage: their overlays are white-on-dark */
+.gjsp-btn:hover, .gjss-btn:hover, .gjsp-act:hover, .gjss-act:hover, .gjsp-toggle:hover { background: var(--luna-hover); }
+.gjsp-item:hover, .gjsp-item:focus-visible, .gjss-item:hover, .gjss-item:focus-visible { background: var(--luna-hover); }
+.gjsp-item.is-active { background: var(--luna-primary-soft); color: var(--luna-primary); border-left-color: var(--luna-primary); }
+.gjsp-search, .gjss-search, .gjsp-select, .gjsp-input, .gjsp-modal select, .gjss-input {
+  background: var(--luna-paper); color: var(--luna-text); border: 1px solid var(--luna-border); border-radius: var(--luna-radius); padding: 7px 10px;
+}
+.gjsp-search:focus, .gjss-search:focus, .gjsp-select:focus, .gjsp-input:focus, .gjss-input:focus { outline: 0; border-color: var(--luna-primary); box-shadow: 0 0 0 1px var(--luna-primary); }
+.gjsp-modal td { border-bottom-color: var(--luna-divider); }
+.gjss-item fieldset, .gjss-items fieldset { border-color: var(--luna-divider); }
+.gjsp-secondary, .gjss-secondary { background: transparent; color: var(--luna-primary); border: 1px solid rgba(25, 118, 210, .5); border-radius: var(--luna-radius); }
+.gjsp-secondary:hover, .gjss-secondary:hover { background: var(--luna-primary-softer); border-color: var(--luna-primary); }
+.gjsp-primary, .gjss-primary { background: var(--luna-primary); color: #fff; border-radius: var(--luna-radius); box-shadow: var(--luna-shadow-1); }
+.gjsp-toggle, .gjss-toggle { border-color: var(--luna-divider); box-shadow: var(--luna-shadow-1); }
+.gjss-floating { box-shadow: var(--luna-shadow-8); }
+.gjss-menu { background: var(--luna-paper); color: var(--luna-text); border: 0; border-radius: var(--luna-radius); box-shadow: var(--luna-shadow-8); font-family: var(--luna-font); }
+.gjss-menu-item:hover { background: var(--luna-hover); }
+.gjss-menu-new { border-top-color: var(--luna-divider); }
+.gjss-menu-group { color: var(--luna-text-2); opacity: 1; }
+
+/* ---------- details ---------- */
+
+.gjs-field { min-height: 32px; box-sizing: border-box; }
+.gjs-field input, .gjs-field select { padding: 6px 8px; box-sizing: border-box; }
+.gjs-input-holder, .gjs-field .gjs-input-holder { border: 0; background: transparent; box-shadow: none; }
+.gjs-sm-composite.gjs-sm-property, .gjs-sm-composite .gjs-sm-properties {
+  background: #fafafa; border: 1px solid var(--luna-divider); border-radius: var(--luna-radius);
+}
+.gjs-btn-prim { white-space: nowrap; }
+.gjs-mdl-btn-close:hover { color: var(--luna-text); }
+.cm-s-hopscotch.CodeMirror, .cm-s-hopscotch .CodeMirror-gutters { background: #263238; }
+.cm-s-hopscotch .CodeMirror-gutters { border-right: 1px solid rgba(255, 255, 255, .08); }
+.gjs-pn-views .gjs-pn-buttons { width: 100%; justify-content: space-between; }

@@ -63,7 +63,7 @@ On the published site: components that work with a script (tabs, the navbar's me
 countdown, typed text) run only on sites that allow custom code, luna-pages' `custom_code`
 setting (grapesjs-pages publishes their script after the page's HTML; other sites get it
 removed and show the components still). Form fields (`input`, `select`, `textarea`) are not
-published at all: luna-pages drops them, a site has nowhere to send a form yet. No Node and no CDN: the files are vendored in
+published at all: luna-pages drops them, a site has nowhere to send a form yet. Luna's own theme (`resources/editor/luna-theme.css`: light, after MUI, fixed sizes) replaces GrapesJS' dark one. No Node and no CDN: the files are vendored in
 [`resources/editor`](resources/editor/README.md) with their versions and hashes, embedded into
 the binary and served at `/assets/editor/<file>?v=<hash>` (immutable). Font Awesome, which
 GrapesJS would fetch from cdnjs, is among them.

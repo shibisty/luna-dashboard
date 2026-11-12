@@ -93,7 +93,8 @@ var (
 	tuiStyles  = []string{"tui-color-picker.min.css", "tui-image-editor.min.css"}
 )
 
-var editorStyles = []string{"grapes.min.css", "grapick.min.css"}
+// luna-theme.css last: Luna's look over GrapesJS' dark one.
+var editorStyles = []string{"grapes.min.css", "grapick.min.css", "luna-theme.css"}
 
 // Editor is the page editor: a whole-window page outside the dashboard's
 // layout.

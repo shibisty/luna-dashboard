@@ -8,18 +8,21 @@ import (
 	"fullstack-validation"
 	"fullstack/web"
 
+	"luna-dashboard/app/sessions"
 	"luna-dashboard/app/users"
 )
 
 // Auth serves login, registration and logout.
 type Auth struct {
-	App  *fullstack.App
-	Auth *auth.Auth
+	App    *fullstack.App
+	Auth   *auth.Auth
+	Keeper *sessions.Keeper
 }
 
 type loginForm struct {
 	Email    string `form:"email" validate:"required,email"`
 	Password string `form:"password" validate:"required"`
+	Remember bool   `form:"remember"`
 }
 
 type registerForm struct {
@@ -38,7 +41,7 @@ func (h Auth) ShowLogin(c *web.Ctx) error {
 func (h Auth) Login(c *web.Ctx) error {
 	var in loginForm
 	fail := func(errs validation.Errors) error {
-		return c.HTML(422, "pages/login", page(h.App, c, map[string]any{"Errors": errs, "Email": in.Email, "Redirect": c.Query("redirect")}))
+		return c.HTML(422, "pages/login", page(h.App, c, map[string]any{"Errors": errs, "Email": in.Email, "Remember": in.Remember, "Redirect": c.Query("redirect")}))
 	}
 	if err := validation.Bind(c, &in); err != nil {
 		if errs, ok := validation.ErrorsOf(err); ok {
@@ -46,11 +49,14 @@ func (h Auth) Login(c *web.Ctx) error {
 		}
 		return err
 	}
-	_, err := h.Auth.Attempt(c, "local", map[string]string{"email": in.Email, "password": in.Password})
+	id, err := h.Auth.Credential(c.Context(), "local", map[string]string{"email": in.Email, "password": in.Password})
 	if errors.Is(err, auth.ErrInvalidCredentials) {
 		return fail(validation.Errors{"email": {"These credentials do not match our records."}})
 	}
 	if err != nil {
+		return err
+	}
+	if err := h.Keeper.Login(c, id, in.Remember); err != nil {
 		return err
 	}
 	return c.Redirect(0, h.Auth.Intended(c, "/dashboard"))
@@ -84,7 +90,7 @@ func (h Auth) Register(c *web.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if err := h.Auth.Login(c, users.Identity(u)); err != nil {
+	if err := h.Keeper.Login(c, users.Identity(u), false); err != nil {
 		return err
 	}
 	return c.Redirect(0, "/dashboard")
@@ -92,7 +98,7 @@ func (h Auth) Register(c *web.Ctx) error {
 
 // Logout ends the session.
 func (h Auth) Logout(c *web.Ctx) error {
-	if err := h.Auth.Logout(c); err != nil {
+	if err := h.Keeper.Logout(c); err != nil {
 		return err
 	}
 	return c.Redirect(0, "/")

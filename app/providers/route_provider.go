@@ -7,6 +7,7 @@ import (
 	"fullstack/view"
 	"fullstack/web"
 
+	"luna-dashboard/app/sessions"
 	"luna-dashboard/resources"
 	"luna-dashboard/routes"
 )
@@ -35,6 +36,11 @@ func (RouteProvider) Boot(app *fullstack.App) error {
 	if err != nil {
 		return err
 	}
-	routes.Web(app, au)
+	keeper, err := sessions.NewKeeper(app, au)
+	if err != nil {
+		return err
+	}
+	fullstack.Set(app, keeper)
+	routes.Web(app, au, keeper)
 	return routes.API(app)
 }

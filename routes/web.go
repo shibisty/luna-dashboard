@@ -9,20 +9,22 @@ import (
 	"fullstack/web"
 
 	"luna-dashboard/app/http/controllers"
+	"luna-dashboard/app/sessions"
 )
 
-// Web registers the pages: the session cookie identifies the user and
-// forms carry the CSRF token.
-func Web(app *fullstack.App, au *auth.Auth) {
+// Web registers the pages: the session cookie identifies the user (a
+// refresh token starts the next session, see sessions.Keeper) and forms
+// carry the CSRF token.
+func Web(app *fullstack.App, au *auth.Auth, keeper *sessions.Keeper) {
 	home := controllers.Home{App: app}
-	login := controllers.Auth{App: app, Auth: au}
+	login := controllers.Auth{App: app, Auth: au, Keeper: keeper}
 	ap := controllers.Apps{App: app}
 	us := controllers.Users{App: app}
 	pg := controllers.Pages{App: app}
 	// The page editor's bundle: public, cached by hash.
 	app.Router.Get("/assets/editor/{file}", controllers.EditorAsset).Name("assets.editor")
 	app.Router.Group("/", func(r *web.Router) {
-		r.Use(au.Web(), au.CSRF())
+		r.Use(keeper.Renew(), au.Web(), au.CSRF())
 		r.Get("/", home.Index).Name("home")
 		r.Get("/dashboard", home.Dashboard, au.Require()).Name("dashboard")
 

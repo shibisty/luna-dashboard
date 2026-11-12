@@ -35,6 +35,18 @@ The users pages call luna-auth's internal API (`app/authapi`, `LUNA_AUTH_URL` wi
 `LUNA_AUTH_TOKEN`) after checking that the application is the developer's; without them the
 pages say that luna-auth is not connected.
 
+## Staying signed in
+
+A login is a short session (`session_id`, `AUTH_SESSION_TTL`) and a refresh token
+(`app/sessions/keeper.go`, passport/refresh in `passport_refresh_tokens`). When the session runs
+out, the next request (a page, the editor's autosave) spends the token for a new session and a
+new token, so whoever keeps working stays signed in. The token is a browser-session cookie
+`luna_refresh` that lasts `DASHBOARD_REFRESH_TTL` from its last use; with *Remember me* it is
+`luna_remember`, kept for `DASHBOARD_REMEMBER_TTL` (30 days), so a restarted browser is still
+signed in. Tokens rotate: one presented again after its minute of grace (parallel requests) ends
+the whole login, as a stolen copy would. Logging out revokes it. The grace is per process: with
+several dashboard replicas keep sessions sticky.
+
 ## The site editor
 
 `/apps/{app}/pages` is GrapesJS 0.23 with
@@ -96,7 +108,9 @@ go run . migrate         # in production; DB_MIGRATE=true does it at start local
 | `LUNA_AUTH_URL`, `LUNA_AUTH_TOKEN` | luna-auth's internal address and its `LUNA_DASHBOARD_TOKEN`, for the users pages |
 | `LUNA_PAGES_URL`, `LUNA_PAGES_TOKEN` | luna-pages' internal address and its `LUNA_DASHBOARD_TOKEN`, for the site editor |
 | `HTTP_TRUSTED_PROXIES` | nginx's network, so login throttling sees the client |
-| `AUTH_SESSION_TTL` | developers' session lifetime |
+| `AUTH_SESSION_TTL` | a session's lifetime (`30m`; renewed by the refresh token) |
+| `DASHBOARD_REFRESH_TTL` | how long a developer may be away and stay signed in (`2h`) |
+| `DASHBOARD_REMEMBER_TTL` | the same with *Remember me*, across browser restarts (`720h`) |
 
 ## Tests
 

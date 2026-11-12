@@ -193,7 +193,7 @@ func TestEditorBundle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err) // a file and manifest.json disagree: see resources/editor/README.md
 	}
-	for _, name := range []string{"grapes.min.js", "grapes.min.css", "grapesjs-pages.js", "grapesjs-storage.js"} {
+	for _, name := range []string{"grapes.min.js", "grapes.min.css", "grapesjs-pages.js", "grapesjs-storage.js", "grapesjs-fonts.js", "grapesjs-scripts.js"} {
 		if files[name] == nil {
 			t.Fatalf("%s is not in the bundle", name)
 		}
@@ -214,6 +214,11 @@ func TestEditorBundle(t *testing.T) {
 	c.Get("/assets/editor/grapes.min.css").AssertOK().AssertHeader("Content-Type", "text/css; charset=utf-8")
 	c.Get("/assets/editor/manifest.json").AssertNotFound()
 	c.Get("/assets/editor/README.md").AssertNotFound()
+
+	// The font catalogues' proxy is public (grapesjs-fonts fetches without
+	// cookies) and serves only its four routes.
+	c.Get("/editor/fonts/elsewhere/v1/x").AssertNotFound().AssertJSONPath("error", "unknown endpoint")
+	c.Get("/editor/fonts/fontshare/v1/fonts?offset=7&limit=100").AssertNotFound()
 }
 
 func TestPageEditor(t *testing.T) {
@@ -225,7 +230,8 @@ func TestPageEditor(t *testing.T) {
 
 	c.Get("/apps/"+id).AssertOK().AssertSee(base, base+"/entries")
 	r := c.Get(base).AssertOK().AssertHeader("Cache-Control", "no-store").
-		AssertSee("/assets/editor/grapes.min.js?v=", "/assets/editor/grapesjs-pages.js?v=", "/assets/editor/grapesjs-storage.js?v=", `"api":"`+base+`/api"`)
+		AssertSee("/assets/editor/grapes.min.js?v=", "/assets/editor/grapesjs-pages.js?v=", "/assets/editor/grapesjs-storage.js?v=",
+			"/assets/editor/grapesjs-fonts.js?v=", "/assets/editor/grapesjs-scripts.js?v=", `"api":"`+base+`/api"`, `"fonts":"/editor/fonts"`, "markup: scriptsMarkup")
 	csrf := c.Cookie("csrf_token")
 	if csrf == "" || !strings.Contains(r.Text(), `"csrf":"`+csrf+`"`) {
 		t.Fatal("the editor page does not carry the CSRF token")

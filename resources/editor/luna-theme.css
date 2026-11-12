@@ -349,3 +349,18 @@
 .cm-s-hopscotch.CodeMirror, .cm-s-hopscotch .CodeMirror-gutters { background: #263238; }
 .cm-s-hopscotch .CodeMirror-gutters { border-right: 1px solid rgba(255, 255, 255, .08); }
 .gjs-pn-views .gjs-pn-buttons { width: 100%; justify-content: space-between; }
+
+/* ---- grapesjs-scripts (.gjscr-*, the blueprint editor .bpe) and grapesjs-fonts (.gjs-fonts-*) ---- */
+.gjscr-search, .gjscr-input, .gjs-fonts-input, .gjs-fonts-select {
+  background: var(--luna-paper); color: var(--luna-text);
+  border: 1px solid var(--luna-border); border-radius: var(--luna-radius); padding: 7px 10px;
+}
+.gjscr-search:hover, .gjscr-input:hover, .gjs-fonts-input:hover, .gjs-fonts-select:hover { border-color: var(--luna-text); }
+.gjscr-search:focus, .gjscr-input:focus, .gjs-fonts-input:focus, .gjs-fonts-select:focus {
+  border-color: var(--luna-primary); box-shadow: inset 0 0 0 1px var(--luna-primary); outline: none;
+}
+.gjscr-kind:has(input:checked) { background: var(--luna-primary-softer); }
+.gjscr-primary { color: var(--luna-on-primary); }
+.gjs-fonts { --gf-line: var(--luna-divider); --gf-soft: var(--luna-hover); }
+/* The blueprint editor keeps its dark canvas; its accent is Luna's. */
+.bpe { --bpe-accent: #1976d2; }

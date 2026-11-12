@@ -19,7 +19,7 @@ checks the files against it, so a file changes only together with its entry.
 | `grapesjs-export-jsx.js` | [grapesjs-react](https://github.com/shibisty/grapesjs-react): `npm run build` |
 | `luna-theme.css` | **ours**: Luna's theme, light and dark after MUI (dark with `<html data-theme="dark">`, or `system` and a dark OS) (palette, Roboto, radii, elevations), sizes in px so the sidebar (320px) and the block tiles look the same on 4K; it also restyles the plugins written for the dark theme. Edit it here (then its hash) |
 | `roboto-{latin,cyrillic}-{400,500}-normal.woff2` | npm `@fontsource/roboto@5.3.0` (`files/`), for the theme |
-| `grapesjs-sidebar-tools.js`, `grapesjs-context-menu.js`, `grapesjs-pages.js`, `grapesjs-storage.js` | our plugins: `npm run build`, `dist/<name>.umd.cjs` |
+| `grapesjs-sidebar-tools.js`, `grapesjs-context-menu.js`, `grapesjs-pages.js`, `grapesjs-storage.js`, `grapesjs-fonts.js`, `grapesjs-scripts.js` | our plugins: `npm run build`, `dist/<name>.umd.cjs` |
 
 The trailing `//# sourceMappingURL=` line is removed from each file (the maps
 are not shipped).

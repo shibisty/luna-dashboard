@@ -122,6 +122,8 @@ var editorScripts = []string{
 	"grapesjs-sidebar-tools.js",
 	"grapesjs-context-menu.js",
 	"grapesjs-export-jsx.js",
+	"grapesjs-fonts.js",
+	"grapesjs-scripts.js",
 	"grapesjs-pages.js",
 	"grapesjs-storage.js",
 }
@@ -159,8 +161,9 @@ func (h Pages) Editor(c *web.Ctx) error {
 	}
 	l := locale.Detect(c.R)
 	cfg, err := json.Marshal(map[string]any{
-		"app":  a.PublicID,
-		"lang": l.Code(),
+		"app":   a.PublicID,
+		"lang":  l.Code(),
+		"fonts": "/editor/fonts",
 		// The plugins' block labels and categories, and titles for the
 		// panel buttons, in the dashboard's language (GrapesJS' own
 		// locale covers the rest; plugins without one stay English).

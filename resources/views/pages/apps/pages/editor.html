@@ -58,6 +58,23 @@
     // which checks the CSRF header and forwards it to luna-pages.
     var headers = function () { return { 'X-CSRF-Token': cfg.csrf }; };
     var pages = window.grapesjsPages.default;
+    // The blueprint scripts of the open record, as tags at the end of the
+    // published HTML. luna-pages has no files: a script the settings put
+    // in a separate file goes inline.
+    async function scriptsMarkup(out) {
+      var sc = window.editor && window.editor.Scripts;
+      if (!sc || out.kind === 'site') return;
+      var e = await sc.exportPage();
+      var tags = [];
+      if (e.libraries) tags.push(e.libraries);
+      if (e.files && e.files.length) {
+        e.files.forEach(function (f) { tags.push('<script>' + String(f.code).replace(/<\/(script)/gi, '<\\/$1') + '<\/script>'); });
+      } else if (e.scripts) {
+        tags.push(e.scripts);
+      }
+      if (!tags.length) return;
+      return { html: out.html + '\n' + tags.join('\n'), css: out.css };
+    }
     var storage = window.grapesjsStorage;
 
     var editor = grapesjs.init({
@@ -106,9 +123,17 @@
         window.grapesjsSidebarTools,
         window.grapesjsContextMenu.default,
         window.grapesjsExportJsx.default,
+        // Web fonts from Google Fonts, Bunny, Fontsource, Fontshare; their
+        // catalogues come through the dashboard (/editor/fonts), the fonts
+        // from the CDNs. A record's fonts go into its CSS as @import.
+        function (ed) { return window.grapesjsFonts.default(ed, { proxy: cfg.fonts }); },
+        // Blueprints: page behaviour as node graphs, compiled to JavaScript.
+        window.grapesjsScripts.default,
         // grapesjs-pages first: grapesjs-storage then leaves the templates'
         // designs to it and keeps only their fields and the entries.
-        function (ed) { return pages(ed, { remote: { url: cfg.api + '/editor', headers: headers } }); },
+        // A publish adds the record's blueprint scripts and their libraries
+        // (luna-pages keeps them on sites with custom_code).
+        function (ed) { return pages(ed, { remote: { url: cfg.api + '/editor', headers: headers, markup: scriptsMarkup } }); },
         function (ed) { return storage.default(ed, { rest: { url: cfg.api + '/content', headers: headers } }); }
       ],
       pluginsOpts: {
@@ -154,7 +179,18 @@
     editor.on('pages-manager:remote', state);
     editor.on('storage:state', state);
     editor.on('pages-manager:conflict', function () { state('conflict'); });
-    editor.on('pages-manager:published', function () { say({{.L.T "Published"}}); });
+    // luna-pages' warnings (fields without an element, scripts a site
+    // without custom code leaves out) in the bar.
+    function warning(m) {
+      if (/does not allow custom code/.test(m)) return {{.L.T "Scripts and stylesheet links were left out: the site does not allow custom code (custom_code in the site's settings)."}};
+      var f = /^The field (.+) has no element in the template/.exec(m);
+      return f ? {{.L.T "The field %s has no element in the template." "{name}"}}.replace('{name}', f[1]) : m;
+    }
+    editor.on('pages-manager:published', function (e) {
+      var w = (e && e.warnings) || [];
+      if (w.length) say({{.L.T "Published with warnings:"}} + ' ' + w.map(warning).join(' '), true);
+      else say({{.L.T "Published"}});
+    });
 
     // Preview: the open entry, else the open page (layouts and templates
     // are not pages of the site).

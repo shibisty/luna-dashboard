@@ -74,13 +74,27 @@ manager: grapesjs-preset-webpage, -blocks-basic, -plugin-forms, -navbar, -tabs,
 -component-countdown, -custom-code, -tooltip, -typed, -parser-postcss, -style-gradient,
 -style-bg, -style-filter, -plugin-export, -tui-image-editor (its TOAST UI files served here,
 usage statistics off), and ours: grapesjs-cloud-assets (Dropbox, Google Drive, OneDrive; Box
-needs a token server and is left out), -sidebar-tools, -context-menu, -export-jsx.
+needs a token server and is left out), -sidebar-tools, -context-menu, -export-jsx,
+grapesjs-fonts and grapesjs-scripts.
+
+- **Fonts** (grapesjs-fonts; the "Aa" button, the Style Manager's font family, the rich text
+  toolbar): free fonts from Google Fonts, Bunny Fonts, Fontsource and Fontshare. Their catalogues
+  send no CORS headers, so the browser reads them from the dashboard: `GET /editor/fonts/…`
+  (`app/fontsproxy`; public, since the plugin fetches without cookies; only the four catalogue
+  routes, a day's cache in memory, a stale copy when an upstream fails). The fonts themselves come
+  from the CDNs. A record's fonts are saved with it and published as `@import` in its CSS, which
+  luna-pages keeps for these font hosts.
+- **Scripts** (grapesjs-scripts): page behaviour as blueprints, node graphs compiled to plain
+  JavaScript, and CDN libraries. They are saved with the record; publishing adds the compiled
+  script (always inline: luna-pages has no files) and the libraries' tags after the HTML
+  (grapesjs-pages' `remote.markup`). Only sites with `custom_code` keep them; otherwise the publish
+  answers with a warning, shown in the editor's bar.
 
 On the published site: components that work with a script (tabs, the navbar's menu button, the
 countdown, typed text) run only on sites that allow custom code, luna-pages' `custom_code`
 setting (grapesjs-pages publishes their script after the page's HTML; other sites get it
 removed and show the components still). Form fields (`input`, `select`, `textarea`) are not
-published at all: luna-pages drops them, a site has nowhere to send a form yet. Luna's own theme (`resources/editor/luna-theme.css`: light, after MUI, fixed sizes) replaces GrapesJS' dark one. No Node and no CDN: the files are vendored in
+published at all: luna-pages drops them, a site has nowhere to send a form yet. Luna's own theme (`resources/editor/luna-theme.css`: light and dark after MUI, fixed sizes) replaces GrapesJS' dark one. No Node and no CDN for the editor itself (fonts and script libraries come from their CDNs): the files are vendored in
 [`resources/editor`](resources/editor/README.md) with their versions and hashes, embedded into
 the binary and served at `/assets/editor/<file>?v=<hash>` (immutable). Font Awesome, which
 GrapesJS would fetch from cdnjs, is among them.

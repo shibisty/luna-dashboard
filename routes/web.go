@@ -8,6 +8,7 @@ import (
 	auth "fullstack-passport"
 	"fullstack/web"
 
+	"luna-dashboard/app/fontsproxy"
 	"luna-dashboard/app/http/controllers"
 	"luna-dashboard/app/sessions"
 )
@@ -23,6 +24,11 @@ func Web(app *fullstack.App, au *auth.Auth, keeper *sessions.Keeper) {
 	pg := controllers.Pages{App: app}
 	// The page editor's bundle: public, cached by hash.
 	app.Router.Get("/assets/editor/{file}", controllers.EditorAsset).Name("assets.editor")
+	// The font catalogues for the editor's grapesjs-fonts (their APIs send
+	// no CORS headers); public: the plugin fetches without cookies, and
+	// the proxy only serves four fixed catalogues from a day's cache.
+	fonts := fontsproxy.New()
+	app.Router.Get("/editor/fonts/{path...}", func(c *web.Ctx) error { fonts.ServeHTTP(c.W, c.R); return nil }).Name("editor.fonts")
 	app.Router.Group("/", func(r *web.Router) {
 		r.Use(keeper.Renew(), au.Web(), au.CSRF())
 		r.Get("/", home.Index).Name("home")

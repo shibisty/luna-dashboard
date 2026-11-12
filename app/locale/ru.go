@@ -268,6 +268,10 @@ var ru = map[string]string{
 	"Blocks":                  "Блоки",
 	"Content":                 "Контент",
 
+	"Published with warnings:": "Опубликовано, но есть замечания:",
+	"Scripts and stylesheet links were left out: the site does not allow custom code (custom_code in the site's settings).": "Скрипты и ссылки на стили не опубликованы: сайт не разрешает свой код (custom_code в настройках сайта).",
+	"The field %s has no element in the template.": "У поля %s нет элемента в шаблоне.",
+
 	// HTTP statuses (the error page's title)
 	"Bad Request":              "Неверный запрос",
 	"Unauthorized":             "Нужен вход",

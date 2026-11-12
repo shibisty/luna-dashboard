@@ -52,8 +52,18 @@ several dashboard replicas keep sessions sticky.
 `/apps/{app}/pages` is GrapesJS 0.23 with
 [grapesjs-pages](https://github.com/shibisty/grapesjs-pages) (pages, layouts, templates, the
 site's styles) and [grapesjs-storage](https://github.com/shibisty/grapesjs-storage) (templates'
-fields, entries), plus grapesjs-preset-webpage, -blocks-basic, -style-bg, -parser-postcss and
-our grapesjs-sidebar-tools and -context-menu. No Node and no CDN: the files are vendored in
+fields, entries), plus the stand's plugins (`C:\OSPanel6\home\grapesjs`) but its plugins
+manager: grapesjs-preset-webpage, -blocks-basic, -plugin-forms, -navbar, -tabs,
+-component-countdown, -custom-code, -tooltip, -typed, -parser-postcss, -style-gradient,
+-style-bg, -style-filter, -plugin-export, -tui-image-editor (its TOAST UI files served here,
+usage statistics off), and ours: grapesjs-cloud-assets (Dropbox, Google Drive, OneDrive; Box
+needs a token server and is left out), -sidebar-tools, -context-menu, -export-jsx.
+
+On the published site: components that work with a script (tabs, the navbar's menu button, the
+countdown, typed text) run only on sites that allow custom code, luna-pages' `custom_code`
+setting (grapesjs-pages publishes their script after the page's HTML; other sites get it
+removed and show the components still). Form fields (`input`, `select`, `textarea`) are not
+published at all: luna-pages drops them, a site has nowhere to send a form yet. No Node and no CDN: the files are vendored in
 [`resources/editor`](resources/editor/README.md) with their versions and hashes, embedded into
 the binary and served at `/assets/editor/<file>?v=<hash>` (immutable). Font Awesome, which
 GrapesJS would fetch from cdnjs, is among them.

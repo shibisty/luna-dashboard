@@ -69,10 +69,34 @@
       plugins: [
         'grapesjs-preset-webpage',
         'gjs-blocks-basic',
-        'grapesjs-style-bg',
+        'grapesjs-plugin-forms',
+        'grapesjs-navbar',
+        'grapesjs-tabs',
+        'grapesjs-component-countdown',
+        'grapesjs-custom-code',
+        'grapesjs-tooltip',
+        'grapesjs-typed',
         'grapesjs-parser-postcss',
+        'grapesjs-style-gradient',
+        'grapesjs-style-bg',
+        'grapesjs-style-filter',
+        'grapesjs-plugin-export',
+        'grapesjs-tui-image-editor',
+        // Dropbox, Google Drive, OneDrive in the asset manager; each asks
+        // for its app key once (kept in this browser). Box needs a token
+        // server, so it is not offered.
+        function (ed) {
+          var ca = window.grapesjsCloudAssets;
+          var back = function (path) { return location.origin + path; };
+          return ca.default(ed, { providers: [
+            new ca.DropboxProvider({ redirectUri: back(cfg.callbacks.dropbox) }),
+            new ca.GoogleDriveProvider(),
+            new ca.OneDriveProvider({ redirectUri: back(cfg.callbacks.microsoft) })
+          ] });
+        },
         window.grapesjsSidebarTools,
         window.grapesjsContextMenu.default,
+        window.grapesjsExportJsx.default,
         // grapesjs-pages first: grapesjs-storage then leaves the templates'
         // designs to it and keeps only their fields and the entries.
         function (ed) { return pages(ed, { remote: { url: cfg.api + '/editor', headers: headers } }); },
@@ -81,7 +105,19 @@
       pluginsOpts: {
         // No jumping to the style manager on every selection: the Pages and Content panels stay open.
         'grapesjs-preset-webpage': { blocks: ['link-block', 'quote', 'text-basic'], showStylesOnChange: false },
-        'gjs-blocks-basic': { flexGrid: true }
+        'gjs-blocks-basic': { flexGrid: true },
+        'grapesjs-plugin-forms': { blocks: ['form', 'input', 'textarea', 'select', 'checkbox', 'radio', 'button'] },
+        'grapesjs-plugin-export': { btnLabel: 'Export ZIP' },
+        // The image editor's files come from the dashboard, not uicdn.toast.com;
+        // no usage statistics to Google Analytics, no logo from uicdn.
+        'grapesjs-tui-image-editor': {
+          script: cfg.tui.script,
+          style: cfg.tui.style,
+          config: {
+            usageStatistics: false,
+            includeUI: { theme: { 'common.bi.image': 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==' } }
+          }
+        }
       }
     });
     window.editor = editor;

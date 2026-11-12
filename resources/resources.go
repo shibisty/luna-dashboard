@@ -20,7 +20,7 @@ var Views fs.FS = embedded
 // editor is the page editor's bundle (GrapesJS and its plugins, see
 // editor/README.md).
 //
-//go:embed editor/*.js editor/*.css editor/*.woff2 editor/*.woff editor/manifest.json
+//go:embed editor/*.js editor/*.css editor/*.woff2 editor/*.woff editor/*.html editor/manifest.json
 var editor embed.FS
 
 // Editor holds the editor's files by name (grapes.min.js, manifest.json…).

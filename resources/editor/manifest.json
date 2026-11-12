@@ -1,6 +1,13 @@
 {
   "files": [
     {
+      "file": "dropbox-callback.html",
+      "package": "grapesjs-cloud-assets",
+      "version": "0.9.0",
+      "source": "github.com/shibisty/grapes-cloud (public/)",
+      "sha256": "340c8ad08ce7ace2145d5ffaae99e9a6a7f6ec979be91c2cbf447a170424c6b6"
+    },
+    {
       "file": "font-awesome.min.css",
       "package": "font-awesome",
       "version": "4.7.0",
@@ -43,6 +50,20 @@
       "sha256": "5d7ea05d4dec26d7e028106e70a7db19d29ebb82b3bd4049f9dbcb096e68a1f8"
     },
     {
+      "file": "grapesjs-cloud-assets.js",
+      "package": "grapesjs-cloud-assets",
+      "version": "0.9.0",
+      "source": "github.com/shibisty/grapes-cloud",
+      "sha256": "ff7f416a06e124aae96c926bab0dcbabbdafe1cfc912a355385015a0dc7f1d31"
+    },
+    {
+      "file": "grapesjs-component-countdown.js",
+      "package": "grapesjs-component-countdown",
+      "version": "1.0.2",
+      "source": "npm",
+      "sha256": "ca1fe0848c3fd784c68f6deb44a1982a98303f77093e5e87934bebc8d2fd375b"
+    },
+    {
       "file": "grapesjs-context-menu.js",
       "package": "grapesjs-context-menu",
       "version": "1.0.1",
@@ -50,11 +71,32 @@
       "sha256": "403141640a06e4050b4e75714fb96716b437205a3d17fe00181cf2fbe2a52985"
     },
     {
+      "file": "grapesjs-custom-code.js",
+      "package": "grapesjs-custom-code",
+      "version": "1.0.2",
+      "source": "npm",
+      "sha256": "15d6721717d7ced1c3dbf36d3995c0e174dbade9dc6cab0d102db42126d36d37"
+    },
+    {
+      "file": "grapesjs-export-jsx.js",
+      "package": "grapesjs-export-jsx",
+      "version": "1.0.0",
+      "source": "github.com/shibisty/grapesjs-react",
+      "sha256": "e3ee96f3762c1ad4f7efe5fdc82a1fcd0fc5cd7006cb31d5e47e5bcaef054684"
+    },
+    {
+      "file": "grapesjs-navbar.js",
+      "package": "grapesjs-navbar",
+      "version": "1.0.2",
+      "source": "npm",
+      "sha256": "5d7ba202d2960ca2528ea34d6e30d458333964184e507c214e7d6f021973c70c"
+    },
+    {
       "file": "grapesjs-pages.js",
       "package": "grapesjs-pages",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "source": "github.com/shibisty/grapesjs-pages",
-      "sha256": "5d7058b2467010a6c2d2ca0c8b5fb118372f137e6e0f87ca490cddd941087551"
+      "sha256": "2966bea192ee38aaf185fb1627bc225261eb070bdbf409c78d7f7b6c4841a63f"
     },
     {
       "file": "grapesjs-parser-postcss.js",
@@ -62,6 +104,20 @@
       "version": "1.0.3",
       "source": "npm",
       "sha256": "e1449e4e79b43f415e0d747fa666572d4febacbed536fd5b5bc599d01183f6ec"
+    },
+    {
+      "file": "grapesjs-plugin-export.js",
+      "package": "grapesjs-plugin-export",
+      "version": "1.0.12",
+      "source": "npm",
+      "sha256": "ddc209c6d4d0fd448ec3de88d2cda68a6944316752f8dfd5cf5bc8bd961ca4f7"
+    },
+    {
+      "file": "grapesjs-plugin-forms.js",
+      "package": "grapesjs-plugin-forms",
+      "version": "2.0.6",
+      "source": "npm",
+      "sha256": "ba11763cea107077cae2c0afabd633206b0d215bdc08ee29169e846e214e0347"
     },
     {
       "file": "grapesjs-preset-webpage.js",
@@ -92,11 +148,95 @@
       "sha256": "fbf953d2215eec544eedd9a959f07dd7bb2452c0977639fc2646febdc0bf4558"
     },
     {
+      "file": "grapesjs-style-filter.js",
+      "package": "grapesjs-style-filter",
+      "version": "1.0.2",
+      "source": "npm",
+      "sha256": "acca1b229139a92c645d5891523e9525b8c63994b61df7a9421785a877942977"
+    },
+    {
+      "file": "grapesjs-style-gradient.js",
+      "package": "grapesjs-style-gradient",
+      "version": "3.0.3",
+      "source": "npm",
+      "sha256": "9a8791a39235677675b5ed7f1d13b890ba01a1842bc525b6c1f203b22c3f8208"
+    },
+    {
+      "file": "grapesjs-tabs.js",
+      "package": "grapesjs-tabs",
+      "version": "1.0.6",
+      "source": "npm (dist/grapesjs-tabs.min.js)",
+      "sha256": "7a569bd00a6b5f0cc0fe61cba0fc7216fd31f76372ef3f9b907ed65c3f936c21"
+    },
+    {
+      "file": "grapesjs-tooltip.js",
+      "package": "grapesjs-tooltip",
+      "version": "0.1.8",
+      "source": "npm",
+      "sha256": "6c80b64103e633f2604a6b83f784dd0ac29cb5c8341cca6117a1be99dd268618"
+    },
+    {
+      "file": "grapesjs-tui-image-editor.js",
+      "package": "grapesjs-tui-image-editor",
+      "version": "1.0.2",
+      "source": "npm",
+      "sha256": "0f393a5efc288b475ede71785ec5d0e7d74a5eb4fdc53e17ac12b6500f585830"
+    },
+    {
+      "file": "grapesjs-typed.js",
+      "package": "grapesjs-typed",
+      "version": "2.0.1",
+      "source": "npm",
+      "sha256": "983bacb434edd219cb0c58a0d5e9eff7a8f9b5a878ed46f069a31f6ca351c38a"
+    },
+    {
       "file": "grapick.min.css",
       "package": "grapick",
       "version": "0.1.13",
       "source": "npm",
       "sha256": "326c23e018693a03f0636286aa7b419e27eaa3a6e94e4aceef62e94332229563"
+    },
+    {
+      "file": "microsoft-callback.html",
+      "package": "grapesjs-cloud-assets",
+      "version": "0.9.0",
+      "source": "github.com/shibisty/grapes-cloud (public/)",
+      "sha256": "d34e2dcbc7dd2dafc8b3c0db00edd60e6a0857014490500a34d632b62f98da1a"
+    },
+    {
+      "file": "tui-code-snippet.min.js",
+      "package": "tui-code-snippet",
+      "version": "1.5.2",
+      "source": "npm",
+      "sha256": "deca28158c01c4363ab7f4f11356c3967a0c4dfdc1c1a1963cc3201703e3c48e"
+    },
+    {
+      "file": "tui-color-picker.min.css",
+      "package": "tui-color-picker",
+      "version": "2.2.7",
+      "source": "npm",
+      "sha256": "f2d60245eb32ce3726786535fcb32c5eb77971d16c0ac5b3f08431095c0f579d"
+    },
+    {
+      "file": "tui-color-picker.min.js",
+      "package": "tui-color-picker",
+      "version": "2.2.7",
+      "source": "npm",
+      "sha256": "a4451f595af9d36f61d2b187553710f37ff4db50a49716f137dfcc3326baadff"
+    },
+    {
+      "file": "tui-image-editor.min.css",
+      "package": "tui-image-editor",
+      "version": "3.15.2",
+      "source": "npm",
+      "sha256": "e4e2ca219fa885b9a4cb7356097b76d4d5e78544d98b947a366f609eb47e92f8"
+    },
+    {
+      "file": "tui-image-editor.min.js",
+      "package": "tui-image-editor",
+      "version": "3.15.2",
+      "source": "npm (Fabric.js inside)",
+      "sha256": "01db2fda4c4928a623dfd35ac139d25d10b7d6f4826e5987b437a5eed7f590f7"
     }
   ]
 }

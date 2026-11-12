@@ -107,6 +107,8 @@ func EditorAsset(c *web.Ctx) error {
 		h.Set("Content-Type", "text/javascript; charset=utf-8")
 	case ".css":
 		h.Set("Content-Type", "text/css; charset=utf-8")
+	case ".html": // grapesjs-cloud-assets' sign-in callbacks
+		h.Set("Content-Type", "text/html; charset=utf-8")
 	case ".woff2":
 		h.Set("Content-Type", "font/woff2")
 	case ".woff":

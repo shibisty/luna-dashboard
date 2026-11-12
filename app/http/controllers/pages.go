@@ -58,19 +58,40 @@ func (h Pages) unavailable(c *web.Ctx, a *models.Application, err error) error {
 /* ---------------- the editor ---------------- */
 
 // editorScripts are the bundle's scripts in load order: GrapesJS, the
-// official plugins, ours. grapesjs-pages comes before grapesjs-storage,
-// which then leaves the templates' designs to it.
+// official plugins, ours (the stand's set, C:\OSPanel6\home\grapesjs,
+// without the plugins manager). grapesjs-pages comes before
+// grapesjs-storage, which then leaves the templates' designs to it.
 var editorScripts = []string{
 	"grapes.min.js",
 	"grapesjs-preset-webpage.js",
 	"grapesjs-blocks-basic.js",
-	"grapesjs-style-bg.js",
+	"grapesjs-plugin-forms.js",
+	"grapesjs-navbar.js",
+	"grapesjs-tabs.js",
+	"grapesjs-component-countdown.js",
+	"grapesjs-custom-code.js",
+	"grapesjs-tooltip.js",
+	"grapesjs-typed.js",
 	"grapesjs-parser-postcss.js",
+	"grapesjs-style-gradient.js",
+	"grapesjs-style-bg.js",
+	"grapesjs-style-filter.js",
+	"grapesjs-plugin-export.js",
+	"grapesjs-tui-image-editor.js",
+	"grapesjs-cloud-assets.js",
 	"grapesjs-sidebar-tools.js",
 	"grapesjs-context-menu.js",
+	"grapesjs-export-jsx.js",
 	"grapesjs-pages.js",
 	"grapesjs-storage.js",
 }
+
+// The TOAST UI image editor, which grapesjs-tui-image-editor loads when it
+// is first opened (from uicdn.toast.com unless told otherwise).
+var (
+	tuiScripts = []string{"tui-code-snippet.min.js", "tui-color-picker.min.js", "tui-image-editor.min.js"}
+	tuiStyles  = []string{"tui-color-picker.min.css", "tui-image-editor.min.css"}
+)
 
 var editorStyles = []string{"grapes.min.css", "grapick.min.css"}
 
@@ -105,6 +126,12 @@ func (h Pages) Editor(c *web.Ctx) error {
 		"grapesjs": files["grapes.min.js"].Version,
 		// GrapesJS loads Font Awesome from a CDN unless told where it is.
 		"icons": files["font-awesome.min.css"].URL(),
+		"tui":   map[string][]string{"script": urls(tuiScripts), "style": urls(tuiStyles)},
+		// grapesjs-cloud-assets' sign-in popups come back here.
+		"callbacks": map[string]string{
+			"dropbox":   "/assets/editor/dropbox-callback.html",
+			"microsoft": "/assets/editor/microsoft-callback.html",
+		},
 	})
 	if err != nil {
 		return err

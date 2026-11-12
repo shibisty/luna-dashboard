@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!--
+  Статическая страница-редирект для OAuth PKCE у Dropbox (и по
+  такой же схеме — у любого другого провайдера с Authorization Code
+  flow). Скопируйте этот файл на СВОЙ домен (туда же, где работает
+  редактор) и укажите его полный URL как redirect_uri:
+
+    1. в настройках приложения Dropbox (App Console → OAuth 2 →
+       Redirect URIs) — должен совпадать 1-в-1, включая протокол;
+    2. в опциях DropboxProvider на сайте (redirectUri).
+
+  Страница ничего не делает, кроме как передаёт code/state обратно
+  в окно, которое её открыло, через postMessage, и закрывается.
+-->
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Авторизация…</title>
+</head>
+<body>
+  <p>Завершаем авторизацию…</p>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var payload = {
+        source: 'grapesjs-cloud-assets-oauth',
+        code: params.get('code') || undefined,
+        state: params.get('state') || undefined,
+        error: params.get('error_description') || params.get('error') || undefined
+      };
+      if (window.opener) {
+        window.opener.postMessage(payload, window.location.origin);
+      }
+      window.close();
+    })();
+  </script>
+</body>
+</html>

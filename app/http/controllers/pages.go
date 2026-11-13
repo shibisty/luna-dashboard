@@ -17,6 +17,7 @@ import (
 	"fullstack-validation"
 	"fullstack/web"
 
+	"luna-dashboard/app/filesapi"
 	"luna-dashboard/app/locale"
 	"luna-dashboard/app/models"
 	"luna-dashboard/app/pagesapi"
@@ -160,7 +161,14 @@ func (h Pages) Editor(c *web.Ctx) error {
 		return out
 	}
 	l := locale.Detect(c.R)
+	// The asset manager lists and uploads the application's images in
+	// luna-files, when it is connected.
+	var assets any
+	if fc, err := fullstack.Make[*filesapi.Client](h.App); err == nil && fc.Configured() {
+		assets = map[string]any{"api": filesURL(a) + "/api", "max": fc.MaxUpload(), "browser": filesURL(a)}
+	}
 	cfg, err := json.Marshal(map[string]any{
+		"files": assets,
 		"app":   a.PublicID,
 		"lang":  l.Code(),
 		"fonts": "/editor/fonts",

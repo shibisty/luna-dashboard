@@ -1,0 +1,75 @@
+{{define "title"}}{{.File.Name}} · {{.L.T "Files"}} · {{.Application.Name}} · {{.App}}{{end}}
+{{define "content"}}
+<p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a> · <a href="{{.Back}}">{{.L.T "Files"}}</a></p>
+<nav class="crumbs" aria-label="{{.L.T "Folders"}}">
+  <a href="{{.URL}}">{{.L.T "All files"}}</a>{{range .Path}} <span class="muted">/</span> <a href="{{$.URL}}?folder={{.ID}}">{{.Name}}</a>{{end}}
+</nav>
+<h1 class="file-name">{{.File.Name}}</h1>
+
+{{with .Done}}<p class="alert info">{{$.L.T .}}</p>{{end}}
+{{with .Message}}<p class="error">{{.}}</p>{{end}}
+{{with .Errors}}{{range $f, $m := .}}<p class="error">{{range $m}}{{.}} {{end}}</p>{{end}}{{end}}
+
+{{if and .Link .File.IsImage}}<p class="preview paper"><img src="{{.Link.URL}}" alt="{{.File.Name}}"></p>{{end}}
+
+<div class="table-wrap"><table>
+  <tr><th>{{.L.T "Size"}}</th><td>{{size .File.Size .L}} <span class="muted">({{.File.Size}} {{.L.T "B"}})</span></td></tr>
+  <tr><th>{{.L.T "Type"}}</th><td><code>{{.File.Mime}}</code></td></tr>
+  {{if .File.Width}}<tr><th>{{.L.T "Dimensions"}}</th><td>{{.File.Width}} × {{.File.Height}} px</td></tr>{{end}}
+  <tr><th>{{.L.T "Access"}}</th><td><span class="badge">{{.L.T .File.Visibility}}</span>{{if eq .File.Status "pending"}} <span class="badge">{{.L.T "upload not finished"}}</span>{{end}}</td></tr>
+  {{with .File.SHA256}}<tr><th>SHA-256</th><td><code>{{.}}</code></td></tr>{{end}}
+  <tr><th>{{.L.T "Uploaded"}}</th><td class="muted">{{.File.CreatedAt.Format "2006-01-02 15:04"}}</td></tr>
+  <tr><th>{{.L.T "Changed"}}</th><td class="muted">{{.File.UpdatedAt.Format "2006-01-02 15:04"}}</td></tr>
+  <tr><th>ID</th><td><code>{{.File.ID}}</code></td></tr>
+</table></div>
+
+{{with .Link}}
+<h2>{{$.L.T "Link"}}</h2>
+{{if $.File.Public}}
+<p class="muted">{{$.L.T "Anyone with this link can open the file. It stays the same while the file is public."}}</p>
+{{else}}
+<p class="muted">{{$.L.T "A private file: this link works until %s. Your application gets fresh ones from GET /v1/files/{id}/url." (.ExpiresAt.Format "2006-01-02 15:04 MST")}}</p>
+{{end}}
+<p class="secret"><code id="file-link">{{.URL}}</code></p>
+<p><a href="{{$.Self}}/open" target="_blank" rel="noopener">{{$.L.T "Open"}}</a> · <a href="{{$.Self}}/open?download=1">{{$.L.T "Download"}}</a> · <button type="button" class="link" data-copy="file-link">{{$.L.T "Copy link"}}</button></p>
+{{end}}
+
+<h2>{{.L.T "Change"}}</h2>
+<form class="card" method="post" action="{{.Self}}">
+  {{.CSRFField}}
+  <label>{{.L.T "Name"}}<input name="name" value="{{.File.Name}}" maxlength="255" required>
+    {{with .Errors}}{{template "error" index . "name"}}{{end}}
+  </label>
+  <label>{{.L.T "Folder"}}
+    <select name="move_to">
+      <option value="">{{.L.T "— stays where it is —"}}</option>
+      <option value="root">{{.L.T "All files (the top)"}}</option>
+      {{range .Moves}}<option value="{{.ID}}">{{.Label}}</option>{{end}}
+    </select>
+  </label>
+  <label>{{.L.T "Access"}}
+    <select name="visibility">
+      <option value="public" {{if .File.Public}}selected{{end}}>{{.L.T "public: a permanent link, on the CDN"}}</option>
+      <option value="private" {{if not .File.Public}}selected{{end}}>{{.L.T "private: links that expire"}}</option>
+    </select>
+  </label>
+  <button>{{.L.T "Save"}}</button>
+</form>
+
+<h2 class="danger">{{.L.T "Delete"}}</h2>
+<form class="card" method="post" action="{{.Self}}/delete" onsubmit="return confirm({{.L.T "Delete %s? Pages that show it will lose it." .File.Name}})">
+  {{.CSRFField}}
+  <p class="muted">{{.L.T "The file and its bytes go for good; its link stops working (copies a CDN keeps may live a little longer)."}}</p>
+  <button class="danger">{{.L.T "Delete file"}}</button>
+</form>
+<script>
+document.querySelectorAll('[data-copy]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var t = document.getElementById(b.dataset.copy).textContent, label = b.textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () {
+      b.textContent = {{.L.T "Copied"}}; setTimeout(function () { b.textContent = label; }, 1500);
+    }, function () { getSelection().selectAllChildren(document.getElementById(b.dataset.copy)); });
+  });
+});
+</script>
+{{end}}

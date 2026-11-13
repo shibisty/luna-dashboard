@@ -1,0 +1,187 @@
+{{define "title"}}{{.L.T "Files"}} · {{.Application.Name}} · {{.App}}{{end}}
+{{define "content"}}
+<p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a></p>
+<h1>{{.L.T "Files"}}</h1>
+<p class="muted">{{.L.T "The files of %s, kept by luna-files: images for the site, documents, anything the application serves. Public files have a permanent link; private ones are read through links that expire." .Application.Name}}</p>
+
+<div class="usage">
+  <div class="meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{.Usage.Percent}}" aria-label="{{.L.T "Storage used"}}"><span style="width: {{.Usage.Percent}}%"></span></div>
+  <span class="muted">{{.L.T "%s of %s used" (size .Usage.Used .L) (size .Usage.Limit .L)}} · {{.L.N .Usage.Files "file"}}</span>
+</div>
+
+{{with .Done}}<p class="alert info">{{$.L.T .}}</p>{{end}}
+{{with .Message}}<p class="error">{{.}}</p>{{end}}
+{{with .Errors}}{{range $f, $m := .}}<p class="error">{{range $m}}{{.}} {{end}}</p>{{end}}{{end}}
+
+<nav class="crumbs" aria-label="{{.L.T "Folders"}}">
+  {{if or .Path .Query}}<a href="{{.URL}}">{{.L.T "All files"}}</a>{{else}}<strong>{{.L.T "All files"}}</strong>{{end}}
+  {{range $i, $f := .Path}} <span class="muted">/</span> {{if eq $f.ID $.Folder}}{{if $.Query}}<a href="{{$.URL}}?folder={{$f.ID}}">{{$f.Name}}</a>{{else}}<strong>{{$f.Name}}</strong>{{end}}{{else}}<a href="{{$.URL}}?folder={{$f.ID}}">{{$f.Name}}</a>{{end}}{{end}}
+</nav>
+
+<form class="search" method="get" action="{{.URL}}">
+  {{with .Folder}}<input type="hidden" name="folder" value="{{.}}">{{end}}
+  <input name="q" value="{{.Query}}" placeholder="{{if .Folder}}{{.L.T "Search in this folder"}}{{else}}{{.L.T "Search by name in every folder"}}{{end}}" aria-label="{{.L.T "Search"}}">
+  <button>{{.L.T "Search"}}</button>
+  {{if .Query}}<a href="{{if .Folder}}{{.URL}}?folder={{.Folder}}{{else}}{{.URL}}{{end}}">{{.L.T "Clear"}}</a>{{end}}
+</form>
+
+{{if or .Folders .Files.Data}}
+<div class="table-wrap"><table class="files">
+  <tr><th></th><th>{{.L.T "Name"}}</th><th>{{.L.T "Size"}}</th><th>{{.L.T "Type"}}</th><th>{{.L.T "Access"}}</th><th>{{.L.T "Changed"}}</th></tr>
+  {{with .Up}}{{if not $.Query}}<tr><td class="thumb"><span class="icon" aria-hidden="true">↰</span></td><td colspan="5"><a href="{{.}}">{{$.L.T "Up"}}</a></td></tr>{{end}}{{end}}
+  {{range .Folders}}
+  <tr>
+    <td class="thumb"><span class="icon folder" aria-hidden="true"></span></td>
+    <td><a href="{{$.URL}}?folder={{.ID}}">{{.Name}}</a></td>
+    <td class="muted">—</td><td class="muted">{{$.L.T "folder"}}</td><td></td>
+    <td class="muted">{{.UpdatedAt.Format "2006-01-02 15:04"}}</td>
+  </tr>
+  {{end}}
+  {{range .Files.Data}}
+  <tr>
+    <td class="thumb">{{if and .IsImage .URL}}<img src="{{.URL}}" alt="" loading="lazy" decoding="async">{{else}}<span class="icon file" aria-hidden="true"></span>{{end}}</td>
+    <td><a href="{{$.URL}}/file/{{.ID}}">{{.Name}}</a>{{if .Width}} <span class="muted">{{.Width}}×{{.Height}}</span>{{end}}</td>
+    <td class="muted">{{size .Size $.L}}</td>
+    <td class="muted"><code>{{.Mime}}</code></td>
+    <td><span class="badge">{{$.L.T .Visibility}}</span></td>
+    <td class="muted">{{.UpdatedAt.Format "2006-01-02 15:04"}}</td>
+  </tr>
+  {{end}}
+</table></div>
+{{if gt .LastPage 1}}
+<p class="muted">{{.L.T "page %d of %d" .Page .LastPage}}
+  {{with .PrevURL}} · <a href="{{.}}">← {{$.L.T "Back"}}</a>{{end}}
+  {{with .NextURL}} · <a href="{{.}}">{{$.L.T "Next"}} →</a>{{end}}
+</p>
+{{end}}
+{{else}}
+<p class="muted">{{if .Query}}{{.L.T "No files match “%s”." .Query}}{{else if .Folder}}{{.L.T "This folder is empty."}}{{else}}{{.L.T "No files yet. Upload some below or from the page editor."}}{{end}}</p>
+{{end}}
+
+<h2>{{.L.T "Upload"}}</h2>
+<form id="upload" class="card drop" method="post" action="{{.URL}}/upload" enctype="multipart/form-data"
+      data-api="{{.URL}}/api" data-max="{{.MaxUpload}}" data-csrf="{{.CSRFToken}}" data-done="{{if .Folder}}{{.URL}}?folder={{.Folder}}&done=uploaded{{else}}{{.URL}}?done=uploaded{{end}}">
+  {{.CSRFField}}
+  <input type="hidden" name="folder_id" value="{{.Folder}}">
+  <label>{{.L.T "Files"}} <span class="muted">{{.L.T "or drop them here; up to %s through the dashboard, larger ones go straight to the storage" (size .MaxUpload .L)}}</span>
+    <input type="file" name="file" multiple required>
+  </label>
+  <label>{{.L.T "Access"}}
+    <select name="visibility">
+      <option value="public">{{.L.T "public: a permanent link, on the CDN"}}</option>
+      <option value="private">{{.L.T "private: links that expire"}}</option>
+    </select>
+  </label>
+  <ul id="uploads" class="uploads" aria-live="polite"></ul>
+  <button>{{.L.T "Upload"}}</button>
+</form>
+
+{{if not .Query}}
+<h2>{{.L.T "New folder"}}</h2>
+<form class="card" method="post" action="{{.URL}}/folders">
+  {{.CSRFField}}
+  <input type="hidden" name="folder_id" value="{{.Folder}}">
+  <label>{{.L.T "Name"}}<input name="name" maxlength="255" required></label>
+  <button>{{.L.T "Create folder"}}</button>
+</form>
+{{end}}
+
+{{with .Current}}
+<h2>{{$.L.T "This folder"}}</h2>
+<form class="card" method="post" action="{{$.URL}}/folders/{{.ID}}">
+  {{$.CSRFField}}
+  <label>{{$.L.T "Name"}}<input name="name" value="{{.Name}}" maxlength="255" required></label>
+  <label>{{$.L.T "Move to"}}
+    <select name="move_to">
+      <option value="">{{$.L.T "— stays where it is —"}}</option>
+      <option value="root">{{$.L.T "All files (the top)"}}</option>
+      {{range $.FolderMoves}}<option value="{{.ID}}">{{.Label}}</option>{{end}}
+    </select>
+  </label>
+  <button>{{$.L.T "Save"}}</button>
+</form>
+<form class="card" method="post" action="{{$.URL}}/folders/{{.ID}}/delete" onsubmit="return confirm({{$.L.T "Delete the folder %s?" .Name}})">
+  {{$.CSRFField}}
+  <label class="check"><input type="checkbox" name="recursive" value="1"> {{$.L.T "with everything in it (subfolders and files)"}}</label>
+  <button class="danger">{{$.L.T "Delete folder"}}</button>
+</form>
+{{end}}
+
+<script type="application/json" id="upload-words">{{.UploadWords}}</script>
+<script>
+(function () {
+  var form = document.getElementById('upload');
+  if (!form || !window.fetch || !window.FormData) return;
+  var api = form.dataset.api, max = Number(form.dataset.max), token = form.dataset.csrf;
+  var list = document.getElementById('uploads'), input = form.querySelector('input[type=file]'), button = form.querySelector('button');
+  var W = JSON.parse(document.getElementById('upload-words').textContent || '{}');
+  function say(m) { return (W.messages && W.messages[m]) || m; }
+  function row(name) {
+    var li = document.createElement('li');
+    var n = document.createElement('span'); n.textContent = name;
+    var p = document.createElement('progress'); p.max = 100; p.value = 0;
+    var s = document.createElement('span'); s.className = 'muted';
+    li.append(n, ' ', p, ' ', s); list.appendChild(li);
+    return { li: li, bar: p, note: s };
+  }
+  // XMLHttpRequest for the progress of the bytes.
+  function send(method, url, headers, body, r) {
+    return new Promise(function (ok, no) {
+      var x = new XMLHttpRequest();
+      x.open(method, url);
+      Object.keys(headers || {}).forEach(function (h) { x.setRequestHeader(h, headers[h]); });
+      x.upload.onprogress = function (e) { if (e.lengthComputable) r.bar.value = e.loaded * 100 / e.total; };
+      x.onload = function () {
+        if (x.status >= 200 && x.status < 300) { try { ok(x.responseText ? JSON.parse(x.responseText) : {}); } catch (e) { ok({}); } return; }
+        var m = '';
+        try { m = JSON.parse(x.responseText).error; } catch (e) {}
+        no(new Error(say(m || x.statusText || ('HTTP ' + x.status))));
+      };
+      x.onerror = function () { no(new Error(W.network)); };
+      x.send(body);
+    });
+  }
+  var json = { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': token };
+  function one(file, folder, vis) {
+    var r = row(file.name), done;
+    if (file.size <= max) {
+      var fd = new FormData();
+      if (folder) fd.append('folder_id', folder);
+      fd.append('visibility', vis);
+      fd.append('rename', '1');
+      fd.append('file', file, file.name);
+      done = send('POST', api + '/files', { 'Accept': 'application/json', 'X-CSRF-Token': token }, fd, r);
+    } else {
+      // Straight to the storage: reserve, send the bytes, complete.
+      r.note.textContent = W.direct;
+      var meta = { name: file.name, size: file.size, mime: file.type, folder_id: folder || null, visibility: vis, rename: true };
+      done = send('POST', api + '/uploads', json, JSON.stringify(meta), { bar: {} }).then(function (s) {
+        return send(s.upload.method, s.upload.url, s.upload.headers, file, r).then(function () {
+          r.note.textContent = W.checking;
+          return send('POST', api + '/files/' + s.file.id + '/complete', json, '{}', { bar: {} });
+        });
+      });
+    }
+    return done.then(function () { r.bar.value = 100; r.note.textContent = W.done; return true; },
+      function (e) { r.li.className = 'error'; r.note.textContent = e.message; return false; });
+  }
+  form.addEventListener('submit', function (ev) {
+    var files = [].slice.call(input.files);
+    if (!files.length) return;
+    ev.preventDefault();
+    button.disabled = true;
+    list.textContent = '';
+    var folder = form.elements.folder_id.value, vis = form.elements.visibility.value, all = true;
+    files.reduce(function (p, f) { return p.then(function () { return one(f, folder, vis).then(function (ok) { all = all && ok; }); }); }, Promise.resolve())
+      .then(function () { if (all) location.href = form.dataset.done; else { button.disabled = false; input.value = ''; } });
+  });
+  ['dragenter', 'dragover'].forEach(function (t) { form.addEventListener(t, function (e) { e.preventDefault(); form.classList.add('over'); }); });
+  ['dragleave', 'drop'].forEach(function (t) { form.addEventListener(t, function (e) { e.preventDefault(); form.classList.remove('over'); }); });
+  form.addEventListener('drop', function (e) {
+    if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+    input.files = e.dataTransfer.files;
+    form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+  });
+})();
+</script>
+{{end}}

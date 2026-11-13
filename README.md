@@ -121,6 +121,24 @@ then forwards the request to luna-pages' internal API (`app/pagesapi`, `LUNA_PAG
   as items with a remove box and an empty row for a new one). Saving sends `If-Match`; a newer
   version (the editor saved meanwhile) answers 409 with the form kept.
 
+## Files
+
+`/apps/{app}/files` is the application's drive in luna-files (`app/filesapi`, `LUNA_FILES_URL` with
+`LUNA_FILES_TOKEN`): folders with breadcrumbs, search in a folder or everywhere, the storage
+used, uploads (several files, dropped or chosen), a file's page with its preview, details and
+link (the public URL, or a signed one that expires for private files), rename, move, public or
+private, delete; a folder is renamed, moved, or deleted with everything in it.
+
+Uploads up to `LUNA_FILES_MAX_UPLOAD` (10 MiB) go through the dashboard as multipart, streamed
+to luna-files; larger ones the page's script sends straight to the storage (a presigned `PUT`
+from `POST …/uploads`, then `…/complete`), so the bucket needs CORS for the dashboard's origin.
+Without JavaScript the form posts to the dashboard, up to the same limit. A name that is taken
+gets a free one (`logo (2).png`).
+
+The page editor's asset manager lists the application's public images and uploads new ones
+there (public), the same way. Both talk to `/apps/{app}/files/api/…`: the session cookie, the
+CSRF token in `X-CSRF-Token`; only listing, reading, uploading and completing pass.
+
 ## Internal API
 
 The other services call `POST /internal/v1/keys/introspect` (with a service token) and
@@ -152,6 +170,8 @@ go run . migrate         # in production; DB_MIGRATE=true does it at start local
 | `LUNA_SERVICE_TOKENS` | tokens of the services allowed to introspect keys, comma-separated |
 | `LUNA_AUTH_URL`, `LUNA_AUTH_TOKEN` | luna-auth's internal address and its `LUNA_DASHBOARD_TOKEN`, for the users pages |
 | `LUNA_PAGES_URL`, `LUNA_PAGES_TOKEN` | luna-pages' internal address and its `LUNA_DASHBOARD_TOKEN`, for the site editor |
+| `LUNA_FILES_URL`, `LUNA_FILES_TOKEN` | luna-files' internal address and its `LUNA_DASHBOARD_TOKEN`, for the files and the editor's images |
+| `LUNA_FILES_MAX_UPLOAD` | bytes sent through the dashboard (luna-files' `FILES_MAX_UPLOAD`, 10 MiB); larger go straight to the storage |
 | `HTTP_TRUSTED_PROXIES` | nginx's network, so login throttling sees the client |
 | `AUTH_SESSION_TTL` | a session's lifetime (`30m`; renewed by the refresh token) |
 | `DASHBOARD_REFRESH_TTL` | how long a developer may be away and stay signed in (`2h`) |

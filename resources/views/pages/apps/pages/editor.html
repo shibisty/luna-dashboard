@@ -77,12 +77,72 @@
     }
     var storage = window.grapesjsStorage;
 
+    // Images in luna-files: the asset manager lists the application's public
+    // images and uploads new ones there (public, a free name when one is
+    // taken); files over the dashboard's limit go straight to the storage.
+    // Without luna-files images are embedded as base64, GrapesJS' default.
+    var files = cfg.files;
+    var fileWords = { failed: {{.L.T "Upload failed:"}}, images: {{.L.T "Only images can be used here."}} };
+    function filesCall(method, path, body, extra) {
+      var h = Object.assign({ 'Accept': 'application/json', 'X-CSRF-Token': cfg.csrf }, extra || {});
+      return fetch(files.api + path, { method: method, credentials: 'same-origin', headers: h, body: body }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (b) {
+          if (!r.ok) throw new Error(b.error || r.statusText);
+          return b;
+        });
+      });
+    }
+    function asset(f) { return { type: 'image', src: f.url, name: f.name, width: f.width, height: f.height, luna_file: f.id }; }
+    function uploadOne(file) {
+      if (file.size <= files.max) {
+        var fd = new FormData();
+        fd.append('visibility', 'public');
+        fd.append('rename', '1');
+        fd.append('file', file, file.name);
+        return filesCall('POST', '/files', fd);
+      }
+      var json = { 'Content-Type': 'application/json' };
+      return filesCall('POST', '/uploads', JSON.stringify({ name: file.name, size: file.size, mime: file.type, visibility: 'public', rename: true }), json)
+        .then(function (s) {
+          return fetch(s.upload.url, { method: s.upload.method, headers: s.upload.headers || {}, body: file }).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return filesCall('POST', '/files/' + s.file.id + '/complete', '{}', json);
+          });
+        });
+    }
+    // GrapesJS calls it as the file uploader (this), with the input's or a
+    // drop's event, and clb for an image dropped on the canvas.
+    function uploadFiles(ev, clb) {
+      var self = this, dt = ev.dataTransfer, list = [].slice.call((dt ? dt.files : ev.target.files) || []);
+      var images = list.filter(function (f) { return /^image\//.test(f.type); });
+      if (!images.length) { if (list.length) say(fileWords.images, true); return; }
+      self.onUploadStart && self.onUploadStart();
+      images.reduce(function (p, f) { return p.then(function (out) { return uploadOne(f).then(function (r) { out.push(asset(r)); return out; }); }); }, Promise.resolve([]))
+        .then(function (out) {
+          var res = { data: out };
+          editor.AssetManager.add(out);
+          self.onUploadEnd && self.onUploadEnd(res);
+          clb && clb(res);
+        }, function (e) {
+          say(fileWords.failed + ' ' + e.message, true);
+          self.onUploadError && self.onUploadError(e);
+        });
+    }
+    function loadImages(ed) {
+      filesCall('GET', '/files?images=1&all=1&limit=500').then(function (p) {
+        var have = {};
+        ed.AssetManager.getAll().forEach(function (a) { have[a.get('src')] = true; });
+        ed.AssetManager.add((p.data || []).filter(function (f) { return f.url && !have[f.url]; }).map(asset));
+      }, function (e) { say(fileWords.failed + ' ' + e.message, true); });
+    }
+
     var editor = grapesjs.init({
       container: '#gjs',
       height: '100%',
       width: 'auto',
       storageManager: false,
       telemetry: false,
+      assetManager: files ? { upload: files.api + '/files', uploadFile: uploadFiles, multiUpload: true, embedAsBase64: false } : {},
       cssIcons: cfg.icons,
       i18n: { locale: cfg.lang, detectLocale: false, messagesAdd: (window.grapesjsLocales || {}) },
       deviceManager: {
@@ -160,6 +220,7 @@
       }
     });
     window.editor = editor;
+    if (files) editor.onReady(function () { loadImages(editor); });
     // Plugins add their CSS as they start: the theme goes after it.
     editor.onReady(function () {
       document.querySelectorAll('link[href*="luna-theme.css"]').forEach(function (l) { document.head.appendChild(l); });

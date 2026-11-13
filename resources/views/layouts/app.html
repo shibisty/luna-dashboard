@@ -104,6 +104,28 @@
     .secret { background: var(--paper); box-shadow: var(--shadow-1); border-left: 4px solid var(--primary); border-radius: 4px; padding: 16px; word-break: break-all; }
     .secret code { background: none; font-size: 1rem; padding: 0; }
 
+    /* The file browser */
+    .usage { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; font-size: .875rem; }
+    .meter { width: 12rem; height: 6px; border-radius: 3px; background: var(--divider); overflow: hidden; }
+    .meter span { display: block; height: 100%; background: var(--primary); }
+    .crumbs { margin: 0 0 8px; font-size: .9375rem; }
+    table.files td.thumb { width: 40px; padding: 6px 0 6px 16px; }
+    table.files td.thumb img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; display: block; background: var(--code-bg); }
+    .icon { display: inline-block; width: 40px; height: 40px; line-height: 40px; text-align: center; color: var(--text-2); border-radius: 4px; background: var(--code-bg); }
+    .icon.folder::before { content: ""; display: inline-block; width: 20px; height: 15px; vertical-align: -2px; border-radius: 2px; background: var(--primary);
+      clip-path: polygon(0 0, 40% 0, 50% 18%, 100% 18%, 100% 100%, 0 100%); }
+    .icon.file::before { content: ""; display: inline-block; width: 15px; height: 19px; vertical-align: -3px; border: 2px solid var(--text-3); border-radius: 2px; }
+    form.drop.over { outline: 2px dashed var(--primary); outline-offset: -8px; }
+    .uploads { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .875rem; }
+    .uploads:empty { display: none; }
+    .uploads progress { width: 8rem; vertical-align: middle; }
+    .uploads li.error span:last-child { color: var(--error); }
+    .preview { padding: 16px; max-width: 44rem; }
+    .preview img { display: block; max-width: 100%; max-height: 60vh; margin: 0 auto; }
+    h1.file-name { word-break: break-all; }
+    button.link { background: none; border: 0; padding: 0; color: var(--primary); font: inherit; text-transform: none; letter-spacing: 0; min-width: 0; height: auto; box-shadow: none; }
+    button.link:hover { background: none; text-decoration: underline; }
+
     /* Forms of the lists */
     form.search { display: flex; gap: 8px; align-items: center; margin: 12px 0; flex-wrap: wrap; }
     form.search input { flex: 1; max-width: 26rem; }

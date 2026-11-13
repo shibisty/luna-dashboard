@@ -1,0 +1,6 @@
+{{define "title"}}{{.L.T "Files"}} · {{.Application.Name}} · {{.App}}{{end}}
+{{define "content"}}
+<p><a href="/apps/{{.Application.PublicID}}">← {{.Application.Name}}</a></p>
+<h1>{{.L.T "Files"}}</h1>
+<p class="error">{{.Message}}</p>
+{{end}}

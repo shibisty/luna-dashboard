@@ -32,7 +32,7 @@ func (RouteProvider) Boot(app *fullstack.App) error {
 	if app.IsLocal() && resources.OnDisk() {
 		views, reload = resources.Disk(), true
 	}
-	v, err := view.New(views, view.Options{Dir: "views", Reload: reload, Funcs: template.FuncMap{"upper": strings.ToUpper, "join": strings.Join, "statusText": http.StatusText, "dict": dict}})
+	v, err := view.New(views, view.Options{Dir: "views", Reload: reload, Funcs: template.FuncMap{"upper": strings.ToUpper, "join": strings.Join, "statusText": http.StatusText, "dict": dict, "size": controllers.SizeText}})
 	if err != nil {
 		return err
 	}

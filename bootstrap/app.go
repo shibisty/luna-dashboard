@@ -12,6 +12,7 @@ import (
 
 	"luna-dashboard/app/apps"
 	"luna-dashboard/app/authapi"
+	"luna-dashboard/app/filesapi"
 	"luna-dashboard/app/pagesapi"
 	"luna-dashboard/app/providers"
 	"luna-dashboard/app/sessions"
@@ -39,6 +40,7 @@ func NewApp(opts ...fullstack.Options) (*fullstack.App, error) {
 		&apps.Provider{},
 		&authapi.Provider{},
 		&pagesapi.Provider{},
+		&filesapi.Provider{},
 		&auth.Provider{
 			// The local strategy checks emails and passwords against the users table.
 			Strategies: []passport.Strategy{local.New(users.Verify(app))},

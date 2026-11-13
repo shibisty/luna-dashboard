@@ -22,6 +22,7 @@ func Web(app *fullstack.App, au *auth.Auth, keeper *sessions.Keeper) {
 	ap := controllers.Apps{App: app}
 	us := controllers.Users{App: app}
 	pg := controllers.Pages{App: app}
+	fl := controllers.Files{App: app}
 	// The page editor's bundle: public, cached by hash.
 	app.Router.Get("/assets/editor/{file}", controllers.EditorAsset).Name("assets.editor")
 	// The font catalogues for the editor's grapesjs-fonts (their APIs send
@@ -75,6 +76,20 @@ func Web(app *fullstack.App, au *auth.Auth, keeper *sessions.Keeper) {
 			r.Post("/{app}/pages/entries/{entry}", pg.SaveEntry)
 			r.Post("/{app}/pages/entries/{entry}/publish", pg.PublishEntry)
 			r.Post("/{app}/pages/entries/{entry}/delete", pg.DeleteEntry)
+
+			// The application's files (luna-files): the browser, and api/
+			// for the uploads of its script and the page editor's assets
+			// (session + CSRF header).
+			r.Get("/{app}/files", fl.Index).Name("apps.files")
+			r.Post("/{app}/files/folders", fl.CreateFolder)
+			r.Post("/{app}/files/folders/{folder}", fl.UpdateFolder)
+			r.Post("/{app}/files/folders/{folder}/delete", fl.DeleteFolder)
+			r.Post("/{app}/files/upload", fl.Upload)
+			r.Get("/{app}/files/file/{file}", fl.Show).Name("apps.files.show")
+			r.Post("/{app}/files/file/{file}", fl.Update)
+			r.Post("/{app}/files/file/{file}/delete", fl.Delete)
+			r.Get("/{app}/files/file/{file}/open", fl.Open).Name("apps.files.open")
+			r.Any("/{app}/files/api/{path...}", fl.API)
 		}, au.Require())
 	})
 }

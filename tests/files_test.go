@@ -29,11 +29,12 @@ type fakeFiles struct {
 	folders map[string]map[string]any
 	files   map[string]map[string]any
 	bytes   map[string][]byte
+	history map[string][]map[string]any
 	calls   []fakeCall
 }
 
 func newFakeFiles(t *testing.T) *fakeFiles {
-	f := &fakeFiles{folders: map[string]map[string]any{}, files: map[string]map[string]any{}, bytes: map[string][]byte{}}
+	f := &fakeFiles{folders: map[string]map[string]any{}, files: map[string]map[string]any{}, bytes: map[string][]byte{}, history: map[string][]map[string]any{}}
 	srv := httptest.NewServer(f)
 	t.Cleanup(srv.Close)
 	t.Setenv("LUNA_FILES_URL", srv.URL)
@@ -201,6 +202,20 @@ func (f *fakeFiles) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			data, _ := io.ReadAll(p)
+			if r := fields["replace_id"]; r != "" {
+				v, ok := f.files[r]
+				if !ok {
+					notFound()
+					return
+				}
+				old := map[string]any{"number": v["version"], "mime": v["mime"], "size": v["size"], "content_at": now, "archived_at": now}
+				f.history[r] = append([]map[string]any{old}, f.history[r]...)
+				v["version"] = v["version"].(int) + 1
+				v["size"], v["mime"] = int64(len(data)), p.Header.Get("Content-Type")
+				f.bytes[r] = data
+				reply(w, 200, v)
+				return
+			}
 			name := fields["name"]
 			if name == "" {
 				name = p.FileName()
@@ -210,7 +225,8 @@ func (f *fakeFiles) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				vis = "public"
 			}
 			v := map[string]any{"id": f.id(), "folder_id": strOrNil(fields["folder_id"]), "name": name, "mime": p.Header.Get("Content-Type"),
-				"size": int64(len(data)), "visibility": vis, "status": "ready", "created_at": now, "updated_at": now, "rename": fields["rename"]}
+				"size": int64(len(data)), "visibility": vis, "status": "ready", "created_at": now, "updated_at": now, "rename": fields["rename"],
+				"version": 1, "content_at": now}
 			if vis == "public" {
 				v["url"] = "https://cdn.test/apps/x/" + v["id"].(string)
 			}
@@ -226,6 +242,40 @@ func (f *fakeFiles) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch {
+		case len(parts) == 3 && parts[2] == "versions":
+			list := f.history[parts[1]]
+			if list == nil {
+				list = []map[string]any{}
+			}
+			reply(w, 200, map[string]any{"data": list})
+		case len(parts) >= 4 && parts[2] == "versions":
+			var hit map[string]any
+			for _, x := range f.history[parts[1]] {
+				if fmt.Sprint(x["number"]) == parts[3] {
+					hit = x
+				}
+			}
+			if hit == nil {
+				notFound()
+				return
+			}
+			switch {
+			case len(parts) == 5 && parts[4] == "url":
+				reply(w, 200, map[string]any{"url": "https://bucket.test/v/" + parts[3] + "?" + r.URL.RawQuery, "expires_at": "2026-11-13T12:15:00Z"})
+			case len(parts) == 5 && parts[4] == "restore":
+				v["version"] = v["version"].(int) + 1
+				v["size"] = hit["size"]
+				reply(w, 200, v)
+			case r.Method == "DELETE":
+				var keep []map[string]any
+				for _, x := range f.history[parts[1]] {
+					if x["number"] != hit["number"] {
+						keep = append(keep, x)
+					}
+				}
+				f.history[parts[1]] = keep
+				w.WriteHeader(204)
+			}
 		case len(parts) == 3 && parts[2] == "url":
 			if v["visibility"] == "public" {
 				reply(w, 200, map[string]any{"url": v["url"]})
@@ -390,4 +440,41 @@ func TestFilesWithoutLunaFiles(t *testing.T) {
 	c.Get("/apps/"+id+"/files").AssertStatus(http.StatusBadGateway).AssertSee("LUNA_FILES_URL")
 	c.GetJSON("/apps/"+id+"/files/api/files").AssertStatus(http.StatusBadGateway)
 	c.Get("/apps/"+id+"/pages").AssertOK().AssertSee(`"files":null`)
+}
+
+func TestFileVersions(t *testing.T) {
+	fs := newFakeFiles(t)
+	app := newApp(t)
+	c := developer(t, apptest.New(t, app), "ann@example.com")
+	id := createApp(t, c, "Shop")
+	base := "/apps/" + id + "/files"
+	body, ct := multipartBody(map[string]string{"visibility": "public"}, map[string][]byte{"notes.txt": []byte("one")})
+	c.Do("POST", base+"/upload", body, ct).AssertRedirect()
+	f := fs.byName("notes.txt")
+	fileURL := base + "/file/" + f["id"].(string)
+	c.Get(fileURL).AssertOK().AssertSee("No old versions yet", `action="`+fileURL+`/replace"`, `data-file="`+f["id"].(string)+`"`)
+
+	// A new content through the dashboard (no JavaScript): replace_id.
+	body, ct = multipartBody(nil, map[string][]byte{"notes-v2.txt": []byte("two!")})
+	c.Do("POST", fileURL+"/replace", body, ct).AssertRedirect(fileURL + "?done=replaced")
+	if f["version"] != 2 || string(fs.bytes[f["id"].(string)]) != "two!" {
+		t.Fatalf("replaced: %v", f)
+	}
+	c.Get(fileURL+"?done=replaced").AssertOK().AssertSee("the old one is in the history", fileURL+"/versions/1/open", fileURL+"/versions/1/restore")
+
+	// An old version: a signed link, restore, delete.
+	r := c.Get(fileURL + "/versions/1/open?download=1").AssertRedirect()
+	if loc := r.Header().Get("Location"); !strings.HasPrefix(loc, "https://bucket.test/v/1") || !strings.Contains(loc, "download=1") {
+		t.Fatal(loc)
+	}
+	c.Post(fileURL+"/versions/1/restore", nil).AssertRedirect(fileURL + "?done=restored")
+	if f["version"] != 3 {
+		t.Fatal(f)
+	}
+	c.Post(fileURL+"/versions/1/delete", nil).AssertRedirect(fileURL + "?done=version-deleted")
+	c.Post(fileURL+"/versions/1/delete", nil).AssertNotFound()
+	c.Get(fileURL + "/versions/x/open").AssertNotFound()
+
+	// Another developer: nothing.
+	developer(t, apptest.New(t, app), "bob@example.com").Post(fileURL+"/versions/2/restore", nil).AssertNotFound()
 }

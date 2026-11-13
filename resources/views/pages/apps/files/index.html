@@ -6,7 +6,7 @@
 
 <div class="usage">
   <div class="meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{.Usage.Percent}}" aria-label="{{.L.T "Storage used"}}"><span style="width: {{.Usage.Percent}}%"></span></div>
-  <span class="muted">{{.L.T "%s of %s used" (size .Usage.Used .L) (size .Usage.Limit .L)}} · {{.L.N .Usage.Files "file"}}</span>
+  <span class="muted">{{.L.T "%s of %s used" (size .Usage.Used .L) (size .Usage.Limit .L)}} · {{.L.N .Usage.Files "file"}}{{if .Usage.Versions}} · {{.L.T "history: %s in %s" (size .Usage.History .L) (.L.N .Usage.Versions "old version")}}{{if .Usage.Saved}} · {{.L.T "%s saved by storing equal contents once" (size .Usage.Saved .L)}}{{end}}{{end}}</span>
 </div>
 
 {{with .Done}}<p class="alert info">{{$.L.T .}}</p>{{end}}

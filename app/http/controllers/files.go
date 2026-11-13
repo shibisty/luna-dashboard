@@ -247,6 +247,12 @@ func doneNotice(done string) string {
 		return "Deleted."
 	case "saved":
 		return "Saved."
+	case "replaced":
+		return "The new content is the current version; the old one is in the history."
+	case "restored":
+		return "Restored: that content is the current version again."
+	case "version-deleted":
+		return "The version was deleted."
 	}
 	return ""
 }
@@ -429,10 +435,16 @@ func (h Files) show(c *web.Ctx, status int, errs validation.Errors, message stri
 	if err != nil {
 		return h.unavailable(c, a, err)
 	}
+	versions, err := cl.Versions(ctx, a.PublicID, f.ID)
+	if err != nil {
+		return h.unavailable(c, a, err)
+	}
 	data := map[string]any{
 		"Application": a, "URL": filesURL(a), "File": f, "Path": path,
 		"Moves": folderOptions(all, ""), "Errors": errs, "Message": message,
 		"Self": fileURL(a, f.ID), "Done": doneNotice(c.Query("done")),
+		"Versions": versions, "MaxUpload": cl.MaxUpload(), "CSRFToken": auth.CSRFToken(c),
+		"API": filesURL(a) + "/api", "UploadWords": uploadWords(locale.Detect(c.R)),
 	}
 	folder := ""
 	if f.FolderID != nil {
@@ -504,6 +516,123 @@ func (h Files) Delete(c *web.Ctx) error {
 		folder = *f.FolderID
 	}
 	return c.Redirect(http.StatusSeeOther, back(a, folder, "deleted"))
+}
+
+// Replace uploads a new content for a file through the dashboard (the
+// form's way without JavaScript; the page's script sends it through api/
+// with replace_id, large files straight to the store).
+func (h Files) Replace(c *web.Ctx) error {
+	cl, a, err := h.current(c)
+	if err != nil {
+		return err
+	}
+	if c.R.MultipartForm == nil {
+		_ = c.R.ParseMultipartForm(32 << 20)
+	}
+	var part *multipart.FileHeader
+	if c.R.MultipartForm != nil && len(c.R.MultipartForm.File["file"]) > 0 {
+		part = c.R.MultipartForm.File["file"][0]
+	}
+	if part == nil {
+		return h.show(c, http.StatusUnprocessableEntity, validation.Errors{"file": {"Choose a file."}}, "")
+	}
+	if part.Size > cl.MaxUpload() {
+		return h.show(c, http.StatusRequestEntityTooLarge, nil,
+			fmt.Sprintf("%s is larger than %s: without JavaScript files go through the dashboard, which takes up to that size.", part.Filename, sizeText(cl.MaxUpload(), locale.Detect(c.R))))
+	}
+	body, err := part.Open()
+	if err != nil {
+		return err
+	}
+	defer body.Close()
+	id := c.Param("file")
+	_, err = cl.Upload(c.Context(), a.PublicID, filesapi.Upload{Name: part.Filename, Mime: part.Header.Get("Content-Type"), Replace: id}, body)
+	if errors.Is(err, filesapi.ErrNotFound) {
+		return web.ErrNotFound
+	}
+	if errs, msg, ok := problem(err); ok {
+		return h.show(c, http.StatusUnprocessableEntity, errs, msg)
+	}
+	if err != nil {
+		return h.unavailable(c, a, err)
+	}
+	return c.Redirect(http.StatusSeeOther, fileURL(a, id)+"?done=replaced")
+}
+
+func versionParam(c *web.Ctx) (int, error) {
+	n, err := strconv.Atoi(c.Param("n"))
+	if err != nil || n < 1 {
+		return 0, web.ErrNotFound
+	}
+	return n, nil
+}
+
+// OpenVersion sends the developer to an old version (a signed link;
+// download=1 as an attachment).
+func (h Files) OpenVersion(c *web.Ctx) error {
+	cl, a, err := h.current(c)
+	if err != nil {
+		return err
+	}
+	n, err := versionParam(c)
+	if err != nil {
+		return err
+	}
+	link, err := cl.VersionURL(c.Context(), a.PublicID, c.Param("file"), n, c.Query("download") == "1")
+	if errors.Is(err, filesapi.ErrNotFound) {
+		return web.ErrNotFound
+	}
+	if err != nil {
+		return h.unavailable(c, a, err)
+	}
+	c.W.Header().Set("Cache-Control", "no-store")
+	c.W.Header().Set("Referrer-Policy", "no-referrer")
+	return c.Redirect(http.StatusSeeOther, link.URL)
+}
+
+// RestoreVersion makes an old version the content again.
+func (h Files) RestoreVersion(c *web.Ctx) error {
+	cl, a, err := h.current(c)
+	if err != nil {
+		return err
+	}
+	n, err := versionParam(c)
+	if err != nil {
+		return err
+	}
+	id := c.Param("file")
+	_, err = cl.Restore(c.Context(), a.PublicID, id, n)
+	if errors.Is(err, filesapi.ErrNotFound) {
+		return web.ErrNotFound
+	}
+	if errs, msg, ok := problem(err); ok {
+		return h.show(c, http.StatusUnprocessableEntity, errs, msg)
+	}
+	if err != nil {
+		return h.unavailable(c, a, err)
+	}
+	return c.Redirect(http.StatusSeeOther, fileURL(a, id)+"?done=restored")
+}
+
+// DeleteVersion removes an old version.
+func (h Files) DeleteVersion(c *web.Ctx) error {
+	cl, a, err := h.current(c)
+	if err != nil {
+		return err
+	}
+	n, err := versionParam(c)
+	if err != nil {
+		return err
+	}
+	id := c.Param("file")
+	err = cl.DeleteVersion(c.Context(), a.PublicID, id, n)
+	if errors.Is(err, filesapi.ErrNotFound) {
+		return web.ErrNotFound
+	}
+	if err != nil {
+		return h.unavailable(c, a, err)
+	}
+	return c.Redirect(http.StatusSeeOther, fileURL(a, id)+"?done=version-deleted")
 }
 
 // Open sends the developer to the file: its public URL or a fresh signed

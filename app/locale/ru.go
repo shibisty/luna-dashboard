@@ -357,6 +357,28 @@ var ru = map[string]string{
 	"A folder cannot go into itself or its own folders.":             "Папку нельзя переместить в неё саму или в её вложенные папки.",
 	"public or private.":                                             "public или private.",
 
+	// File versions
+	"history: %s in %s":                       "история: %s в %s",
+	"%s saved by storing equal contents once": "%s сэкономлено: одинаковое содержимое хранится один раз",
+	"Version":     "Версия",
+	"since %s":    "с %s",
+	"New content": "Новое содержимое",
+	"The file keeps its name, folder and link; the current content goes into the history below.": "У файла останутся имя, папка и ссылка; текущее содержимое уйдёт в историю ниже.",
+	"File":               "Файл",
+	"or drop it here":    "или перетащите сюда",
+	"Replace":            "Заменить",
+	"History":            "История",
+	"Content of":         "Содержимое от",
+	"Replaced":           "Заменено",
+	"same as now":        "как сейчас",
+	"Restore":            "Вернуть",
+	"Delete version %d?": "Удалить версию %d?",
+	"No old versions yet: they appear when the content is replaced.":                                                           "Старых версий пока нет: они появляются, когда содержимое заменяют.",
+	"The file, its history and their bytes go for good; its link stops working (copies a CDN keeps may live a little longer).": "Файл, его история и их данные удаляются насовсем, ссылка перестаёт работать (копии в CDN могут пожить ещё немного).",
+	"The new content is the current version; the old one is in the history.":                                                   "Новое содержимое стало текущей версией, прежнее — в истории.",
+	"Restored: that content is the current version again.":                                                                     "Восстановлено: это содержимое снова текущая версия.",
+	"The version was deleted.": "Версия удалена.",
+
 	// HTTP statuses (the error page's title)
 	"Bad Request":              "Неверный запрос",
 	"Unauthorized":             "Нужен вход",
@@ -443,8 +465,9 @@ func ruPatterns() []pattern {
 
 // ruPlurals are the Russian forms of the counted nouns: one, few, many.
 var ruPlurals = map[string][]string{
-	"user": {"пользователь", "пользователя", "пользователей"},
-	"file": {"файл", "файла", "файлов"},
+	"user":        {"пользователь", "пользователя", "пользователей"},
+	"file":        {"файл", "файла", "файлов"},
+	"old version": {"старой версии", "старых версиях", "старых версиях"},
 }
 
 // ruPlural picks the form for n: 1, 21 → one; 2–4, 22–24 → few; the rest many.

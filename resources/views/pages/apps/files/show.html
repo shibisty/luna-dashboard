@@ -18,6 +18,7 @@
   {{if .File.Width}}<tr><th>{{.L.T "Dimensions"}}</th><td>{{.File.Width}} × {{.File.Height}} px</td></tr>{{end}}
   <tr><th>{{.L.T "Access"}}</th><td><span class="badge">{{.L.T .File.Visibility}}</span>{{if eq .File.Status "pending"}} <span class="badge">{{.L.T "upload not finished"}}</span>{{end}}</td></tr>
   {{with .File.SHA256}}<tr><th>SHA-256</th><td><code>{{.}}</code></td></tr>{{end}}
+  <tr><th>{{.L.T "Version"}}</th><td>{{.File.Version}} <span class="muted">· {{.L.T "since %s" (.File.ContentAt.Format "2006-01-02 15:04")}}</span></td></tr>
   <tr><th>{{.L.T "Uploaded"}}</th><td class="muted">{{.File.CreatedAt.Format "2006-01-02 15:04"}}</td></tr>
   <tr><th>{{.L.T "Changed"}}</th><td class="muted">{{.File.UpdatedAt.Format "2006-01-02 15:04"}}</td></tr>
   <tr><th>ID</th><td><code>{{.File.ID}}</code></td></tr>
@@ -56,13 +57,110 @@
   <button>{{.L.T "Save"}}</button>
 </form>
 
+<h2>{{.L.T "New content"}}</h2>
+<form id="replace" class="card drop" method="post" action="{{.Self}}/replace" enctype="multipart/form-data"
+      data-api="{{.API}}" data-max="{{.MaxUpload}}" data-csrf="{{.CSRFToken}}" data-file="{{.File.ID}}" data-done="{{.Self}}?done=replaced">
+  {{.CSRFField}}
+  <p class="muted">{{.L.T "The file keeps its name, folder and link; the current content goes into the history below."}}</p>
+  <label>{{.L.T "File"}} <span class="muted">{{.L.T "or drop it here"}}</span>
+    <input type="file" name="file" required>
+  </label>
+  <ul id="uploads" class="uploads" aria-live="polite"></ul>
+  <button>{{.L.T "Replace"}}</button>
+</form>
+
+<h2>{{.L.T "History"}}</h2>
+{{if .Versions}}
+<div class="table-wrap"><table>
+  <tr><th>{{.L.T "Version"}}</th><th>{{.L.T "Size"}}</th><th>{{.L.T "Content of"}}</th><th>{{.L.T "Replaced"}}</th><th></th></tr>
+  {{range .Versions}}
+  <tr>
+    <td>{{.Number}}{{if and $.File.SHA256 (eq .SHA256 $.File.SHA256)}} <span class="badge">{{$.L.T "same as now"}}</span>{{end}}</td>
+    <td class="muted">{{size .Size $.L}}{{if .Width}} · {{.Width}}×{{.Height}}{{end}}</td>
+    <td class="muted">{{.ContentAt.Format "2006-01-02 15:04"}}</td>
+    <td class="muted">{{.ArchivedAt.Format "2006-01-02 15:04"}}</td>
+    <td class="actions">
+      <a href="{{$.Self}}/versions/{{.Number}}/open" target="_blank" rel="noopener">{{$.L.T "Open"}}</a> ·
+      <a href="{{$.Self}}/versions/{{.Number}}/open?download=1">{{$.L.T "Download"}}</a> ·
+      <form method="post" action="{{$.Self}}/versions/{{.Number}}/restore" class="inline">{{$.CSRFField}}<button class="link">{{$.L.T "Restore"}}</button></form> ·
+      <form method="post" action="{{$.Self}}/versions/{{.Number}}/delete" class="inline" onsubmit="return confirm({{$.L.T "Delete version %d?" .Number}})">{{$.CSRFField}}<button class="link danger">{{$.L.T "Delete"}}</button></form>
+    </td>
+  </tr>
+  {{end}}
+</table></div>
+{{else}}
+<p class="muted">{{.L.T "No old versions yet: they appear when the content is replaced."}}</p>
+{{end}}
+
 <h2 class="danger">{{.L.T "Delete"}}</h2>
 <form class="card" method="post" action="{{.Self}}/delete" onsubmit="return confirm({{.L.T "Delete %s? Pages that show it will lose it." .File.Name}})">
   {{.CSRFField}}
-  <p class="muted">{{.L.T "The file and its bytes go for good; its link stops working (copies a CDN keeps may live a little longer)."}}</p>
+  <p class="muted">{{.L.T "The file, its history and their bytes go for good; its link stops working (copies a CDN keeps may live a little longer)."}}</p>
   <button class="danger">{{.L.T "Delete file"}}</button>
 </form>
+<script type="application/json" id="upload-words">{{.UploadWords}}</script>
 <script>
+(function () {
+  // A new content through api/: multipart up to the dashboard's limit,
+  // larger files straight to the storage (reserve, send, complete).
+  var form = document.getElementById('replace');
+  if (!form || !window.fetch || !window.FormData) return;
+  var api = form.dataset.api, max = Number(form.dataset.max), token = form.dataset.csrf, id = form.dataset.file;
+  var input = form.querySelector('input[type=file]'), button = form.querySelector('button'), list = document.getElementById('uploads');
+  var W = JSON.parse(document.getElementById('upload-words').textContent || '{}');
+  function say(m) { return (W.messages && W.messages[m]) || m; }
+  function send(method, url, headers, body, bar) {
+    return new Promise(function (ok, no) {
+      var x = new XMLHttpRequest();
+      x.open(method, url);
+      Object.keys(headers || {}).forEach(function (h) { x.setRequestHeader(h, headers[h]); });
+      if (bar) x.upload.onprogress = function (e) { if (e.lengthComputable) bar.value = e.loaded * 100 / e.total; };
+      x.onload = function () {
+        if (x.status >= 200 && x.status < 300) { try { ok(x.responseText ? JSON.parse(x.responseText) : {}); } catch (e) { ok({}); } return; }
+        var m = '';
+        try { m = JSON.parse(x.responseText).error; } catch (e) {}
+        no(new Error(say(m || x.statusText || ('HTTP ' + x.status))));
+      };
+      x.onerror = function () { no(new Error(W.network)); };
+      x.send(body);
+    });
+  }
+  var json = { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': token };
+  form.addEventListener('submit', function (ev) {
+    var file = input.files[0];
+    if (!file) return;
+    ev.preventDefault();
+    button.disabled = true;
+    list.textContent = '';
+    var li = document.createElement('li'), bar = document.createElement('progress'), note = document.createElement('span');
+    bar.max = 100; bar.value = 0; note.className = 'muted';
+    li.append(file.name, ' ', bar, ' ', note); list.appendChild(li);
+    var done;
+    if (file.size <= max) {
+      var fd = new FormData();
+      fd.append('replace_id', id);
+      fd.append('file', file, file.name);
+      done = send('POST', api + '/files', { 'Accept': 'application/json', 'X-CSRF-Token': token }, fd, bar);
+    } else {
+      note.textContent = W.direct;
+      done = send('POST', api + '/uploads', json, JSON.stringify({ replace_id: id, name: file.name, size: file.size, mime: file.type })).then(function (s) {
+        return send(s.upload.method, s.upload.url, s.upload.headers, file, bar).then(function () {
+          note.textContent = W.checking;
+          return send('POST', api + '/files/' + s.file.id + '/complete', json, '{}');
+        });
+      });
+    }
+    done.then(function () { location.href = form.dataset.done; },
+      function (e) { li.className = 'error'; note.textContent = e.message; button.disabled = false; });
+  });
+  ['dragenter', 'dragover'].forEach(function (t) { form.addEventListener(t, function (e) { e.preventDefault(); form.classList.add('over'); }); });
+  ['dragleave', 'drop'].forEach(function (t) { form.addEventListener(t, function (e) { e.preventDefault(); form.classList.remove('over'); }); });
+  form.addEventListener('drop', function (e) {
+    if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+    input.files = e.dataTransfer.files;
+    form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+  });
+})();
 document.querySelectorAll('[data-copy]').forEach(function (b) {
   b.addEventListener('click', function () {
     var t = document.getElementById(b.dataset.copy).textContent, label = b.textContent;

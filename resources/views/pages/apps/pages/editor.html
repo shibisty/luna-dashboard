@@ -93,22 +93,35 @@
       });
     }
     function asset(f) { return { type: 'image', src: f.url, name: f.name, width: f.width, height: f.height, luna_file: f.id }; }
+    // The same image uploaded again is the file already there (dedupe):
+    // no "logo (2).png", nothing stored twice.
+    function sha256(file) {
+      if (!window.crypto || !crypto.subtle || file.size > 64 * 1024 * 1024) return Promise.resolve('');
+      return file.arrayBuffer().then(function (b) { return crypto.subtle.digest('SHA-256', b); }).then(function (d) {
+        return [].map.call(new Uint8Array(d), function (x) { return (x < 16 ? '0' : '') + x.toString(16); }).join('');
+      }, function () { return ''; });
+    }
     function uploadOne(file) {
       if (file.size <= files.max) {
         var fd = new FormData();
         fd.append('visibility', 'public');
         fd.append('rename', '1');
+        fd.append('dedupe', '1');
         fd.append('file', file, file.name);
         return filesCall('POST', '/files', fd);
       }
       var json = { 'Content-Type': 'application/json' };
-      return filesCall('POST', '/uploads', JSON.stringify({ name: file.name, size: file.size, mime: file.type, visibility: 'public', rename: true }), json)
-        .then(function (s) {
-          return fetch(s.upload.url, { method: s.upload.method, headers: s.upload.headers || {}, body: file }).then(function (r) {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return filesCall('POST', '/files/' + s.file.id + '/complete', '{}', json);
-          });
+      return sha256(file).then(function (sum) {
+        var meta = { name: file.name, size: file.size, mime: file.type, visibility: 'public', rename: true, dedupe: !!sum };
+        if (sum) meta.sha256 = sum;
+        return filesCall('POST', '/uploads', JSON.stringify(meta), json);
+      }).then(function (s) {
+        if (!s.upload) return s.file; // already there
+        return fetch(s.upload.url, { method: s.upload.method, headers: s.upload.headers || {}, body: file }).then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return filesCall('POST', '/files/' + s.file.id + '/complete', '{}', json);
         });
+      });
     }
     // GrapesJS calls it as the file uploader (this), with the input's or a
     // drop's event, and clb for an image dropped on the canvas.
@@ -120,7 +133,9 @@
       images.reduce(function (p, f) { return p.then(function (out) { return uploadOne(f).then(function (r) { out.push(asset(r)); return out; }); }); }, Promise.resolve([]))
         .then(function (out) {
           var res = { data: out };
-          editor.AssetManager.add(out);
+          var have = {};
+          editor.AssetManager.getAll().forEach(function (x) { have[x.get('src')] = true; });
+          editor.AssetManager.add(out.filter(function (x) { return !have[x.src]; }));
           self.onUploadEnd && self.onUploadEnd(res);
           clb && clb(res);
         }, function (e) {

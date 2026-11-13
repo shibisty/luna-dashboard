@@ -75,8 +75,22 @@ type File struct {
 	Visibility string    `json:"visibility"`
 	Status     string    `json:"status"`
 	URL        string    `json:"url,omitempty"`
+	Version    int       `json:"version"`
+	ContentAt  time.Time `json:"content_at"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+// Version is an old content of a file.
+type Version struct {
+	Number     int       `json:"number"`
+	Mime       string    `json:"mime"`
+	Size       int64     `json:"size"`
+	SHA256     string    `json:"sha256,omitempty"`
+	Width      *int      `json:"width,omitempty"`
+	Height     *int      `json:"height,omitempty"`
+	ContentAt  time.Time `json:"content_at"`
+	ArchivedAt time.Time `json:"archived_at"`
 }
 
 // IsImage reports whether the file is an image a browser shows.
@@ -110,9 +124,20 @@ type Query struct {
 
 // Usage is an application's storage.
 type Usage struct {
-	Used  int64 `json:"used"`
-	Limit int64 `json:"limit"`
-	Files int   `json:"files"`
+	Used     int64 `json:"used"`
+	Limit    int64 `json:"limit"`
+	Files    int   `json:"files"`
+	Versions int   `json:"versions"`
+	History  int64 `json:"history"`
+	Stored   int64 `json:"stored"`
+}
+
+// Saved is what the history's deduplication saves in the store.
+func (u Usage) Saved() int64 {
+	if d := u.Used - u.Stored; d > 0 {
+		return d
+	}
+	return 0
 }
 
 // Percent is how full the storage is, 0–100.
@@ -143,6 +168,7 @@ type Upload struct {
 	Mime       string
 	Visibility string // public (default) or private
 	Rename     bool   // a free name instead of a conflict
+	Replace    string // a file whose content this replaces (a new version)
 }
 
 // FilePatch changes a file: nil fields stay.
@@ -417,6 +443,42 @@ func (c *Client) DeleteFile(ctx context.Context, app, id string) error {
 	return c.do(ctx, http.MethodDelete, base(app)+"/files/"+url.PathEscape(id), nil, nil)
 }
 
+// Versions is a file's history, newest first.
+func (c *Client) Versions(ctx context.Context, app, id string) ([]Version, error) {
+	var out struct {
+		Data []Version `json:"data"`
+	}
+	err := c.do(ctx, http.MethodGet, base(app)+"/files/"+url.PathEscape(id)+"/versions", nil, &out)
+	return out.Data, err
+}
+
+func versionPath(app, id string, n int) string {
+	return base(app) + "/files/" + url.PathEscape(id) + "/versions/" + strconv.Itoa(n)
+}
+
+// VersionURL is a signed link to an old version.
+func (c *Client) VersionURL(ctx context.Context, app, id string, n int, download bool) (Link, error) {
+	q := ""
+	if download {
+		q = "?download=1"
+	}
+	var l Link
+	err := c.do(ctx, http.MethodGet, versionPath(app, id, n)+"/url"+q, nil, &l)
+	return l, err
+}
+
+// Restore makes an old version the file's content again.
+func (c *Client) Restore(ctx context.Context, app, id string, n int) (File, error) {
+	var f File
+	err := c.do(ctx, http.MethodPost, versionPath(app, id, n)+"/restore", nil, &f)
+	return f, err
+}
+
+// DeleteVersion removes an old version.
+func (c *Client) DeleteVersion(ctx context.Context, app, id string, n int) error {
+	return c.do(ctx, http.MethodDelete, versionPath(app, id, n), nil, nil)
+}
+
 // Usage is the application's storage.
 func (c *Client) Usage(ctx context.Context, app string) (Usage, error) {
 	var u Usage
@@ -433,7 +495,7 @@ func (c *Client) Upload(ctx context.Context, app string, u Upload, body io.Reade
 	mw := multipart.NewWriter(pw)
 	go func() {
 		err := func() error {
-			fields := [][2]string{{"folder_id", u.Folder}, {"name", u.Name}, {"visibility", u.Visibility}}
+			fields := [][2]string{{"folder_id", u.Folder}, {"name", u.Name}, {"visibility", u.Visibility}, {"replace_id", u.Replace}}
 			if u.Rename {
 				fields = append(fields, [2]string{"rename", "1"})
 			}

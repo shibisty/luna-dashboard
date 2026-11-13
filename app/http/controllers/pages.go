@@ -74,7 +74,7 @@ var buttonTitles = map[string]string{
 	"set-device-desktop": "Desktop", "set-device-tablet": "Tablet", "set-device-mobile": "Mobile",
 	"sw-visibility": "Show element borders", "preview": "Preview the design", "fullscreen": "Full screen",
 	"export-template": "View code", "undo": "Undo", "redo": "Redo", "gjs-open-import-webpage": "Import HTML",
-	"canvas-clear": "Clear the canvas", "gca-open-picker-btn": "Insert from cloud", "export-jsx": "Export as React (JSX)",
+	"canvas-clear": "Clear the canvas", "gca-open-picker-btn": "Insert from cloud",
 	"open-sm": "Styles", "open-tm": "Settings of the element", "open-layers": "Layers", "open-blocks": "Blocks",
 	"pages-manager": "Pages", "content-storage": "Content",
 }
@@ -122,7 +122,6 @@ var editorScripts = []string{
 	"grapesjs-cloud-assets.js",
 	"grapesjs-sidebar-tools.js",
 	"grapesjs-context-menu.js",
-	"grapesjs-export-jsx.js",
 	"grapesjs-fonts.js",
 	"grapesjs-scripts.js",
 	"grapesjs-pages.js",

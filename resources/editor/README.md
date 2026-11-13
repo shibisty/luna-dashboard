@@ -16,7 +16,6 @@ checks the files against it, so a file changes only together with its entry.
 | `grapesjs-tabs.js` | npm `grapesjs-tabs`, `dist/grapesjs-tabs.min.js` |
 | `tui-code-snippet.min.js`, `tui-color-picker.min.js`, `tui-color-picker.min.css`, `tui-image-editor.min.js`, `tui-image-editor.min.css` | npm (`dist/`): what grapesjs-tui-image-editor would load from uicdn.toast.com |
 | `grapesjs-cloud-assets.js`, `dropbox-callback.html`, `microsoft-callback.html` | [grapes-cloud](https://github.com/shibisty/grapes-cloud): `npm run build`, and `public/` (the sign-in popups return there) |
-| `grapesjs-export-jsx.js` | [grapesjs-react](https://github.com/shibisty/grapesjs-react): `npm run build` |
 | `luna-theme.css` | **ours**: Luna's theme, light and dark after MUI (dark with `<html data-theme="dark">`, or `system` and a dark OS) (palette, Roboto, radii, elevations), sizes in px so the sidebar (320px) and the block tiles look the same on 4K; it also restyles the plugins written for the dark theme. Edit it here (then its hash) |
 | `roboto-{latin,cyrillic}-{400,500}-normal.woff2` | npm `@fontsource/roboto@5.3.0` (`files/`), for the theme |
 | `grapesjs-sidebar-tools.js`, `grapesjs-context-menu.js`, `grapesjs-pages.js`, `grapesjs-storage.js`, `grapesjs-fonts.js`, `grapesjs-scripts.js` | our plugins: `npm run build`, `dist/<name>.umd.cjs` |

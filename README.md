@@ -74,12 +74,17 @@ manager: grapesjs-preset-webpage, -blocks-basic, -plugin-forms, -navbar, -tabs,
 -component-countdown, -custom-code, -tooltip, -typed, -parser-postcss, -style-gradient,
 -style-bg, -style-filter, -plugin-export, -tui-image-editor (its TOAST UI files served here,
 usage statistics off), and ours: grapesjs-cloud-assets (Dropbox, Google Drive, OneDrive; Box
-needs a token server and is left out), -sidebar-tools, -context-menu, -export-jsx,
+needs a token server and is left out), -sidebar-tools, -context-menu,
 grapesjs-fonts and grapesjs-scripts.
 
 - **Panels** (grapesjs-sidebar-tools 2): every view (Styles, Settings, Layers, Blocks, Pages,
   Content, Scripts, Fonts) is a tab; drag it to the left, right or bottom zone, or split a side
   zone in two. All tabs start on the right (320 px); the layout is kept in the browser.
+  Since 2.2 a device toolbar sits over the canvas (devices, a free size, zoom) and a tab bar of
+  documents under the top bar: each opened page (grapesjs-pages) and each blueprint
+  (grapesjs-scripts) is a tab; the workspace splits into columns, rows or 2 × 2.
+- **Context menu** (grapesjs-context-menu): right click in the canvas or the layers; its *Font*
+  submenu applies the project's fonts (grapesjs-fonts).
 
 - **Fonts** (grapesjs-fonts; the "Aa" button, the Style Manager's font family, the rich text
   toolbar): free fonts from Google Fonts, Bunny Fonts, Fontsource and Fontshare. Their catalogues

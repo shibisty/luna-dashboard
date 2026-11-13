@@ -261,7 +261,6 @@ var ru = map[string]string{
 	"Import HTML":             "Импорт HTML",
 	"Clear the canvas":        "Очистить холст",
 	"Insert from cloud":       "Вставить из облака",
-	"Export as React (JSX)":   "Экспорт в React (JSX)",
 	"Styles":                  "Стили",
 	"Settings of the element": "Настройки элемента",
 	"Layers":                  "Слои",

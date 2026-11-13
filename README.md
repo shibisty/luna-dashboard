@@ -77,6 +77,10 @@ usage statistics off), and ours: grapesjs-cloud-assets (Dropbox, Google Drive, O
 needs a token server and is left out), -sidebar-tools, -context-menu, -export-jsx,
 grapesjs-fonts and grapesjs-scripts.
 
+- **Panels** (grapesjs-sidebar-tools 2): every view (Styles, Settings, Layers, Blocks, Pages,
+  Content, Scripts, Fonts) is a tab; drag it to the left, right or bottom zone, or split a side
+  zone in two. All tabs start on the right (320 px); the layout is kept in the browser.
+
 - **Fonts** (grapesjs-fonts; the "Aa" button, the Style Manager's font family, the rich text
   toolbar): free fonts from Google Fonts, Bunny Fonts, Fontsource and Fontshare. Their catalogues
   send no CORS headers, so the browser reads them from the dashboard: `GET /editor/fonts/…`

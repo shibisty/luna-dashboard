@@ -108,9 +108,9 @@
     {
       "file": "grapesjs-pages.js",
       "package": "grapesjs-pages",
-      "version": "2.3.0",
+      "version": "2.3.1",
       "source": "github.com/shibisty/grapesjs-pages",
-      "sha256": "1ed59ec42b30bf23385858940bdae85eee4939887908caf3c45e4af3a4740bd5"
+      "sha256": "2373efa91b5c2a443c5ba26de0896645aaf6d7fa0bdef8b4650553009b6f2edc"
     },
     {
       "file": "grapesjs-parser-postcss.js",
@@ -145,14 +145,14 @@
       "package": "grapesjs-scripts",
       "version": "0.1.0",
       "source": "github.com/shibisty/grapesjs-scripts",
-      "sha256": "54cd74af6c63744f3e74c2800a90b2b0289353dbafe15089ca62c0adc32328a4"
+      "sha256": "acfac6960317b994edcdbb2e36ef873c0afece8933bed0abf3b8a11543bd9d93"
     },
     {
       "file": "grapesjs-sidebar-tools.js",
       "package": "grapesjs-sidebar-tools",
-      "version": "1.0.1",
-      "source": "github.com/shibisty/grapesjs-sidebar-tools@4bb8233",
-      "sha256": "10057865b58f1c6c9294caf76f514da82157e7222ed16625ed8853ea65df8f95"
+      "version": "2.0.0",
+      "source": "github.com/shibisty/grapesjs-sidebar-tools@c314b57",
+      "sha256": "b6627e1d4f98d99efb98228bf26a94a5bc865518b2243b1653100e3d9f572269"
     },
     {
       "file": "grapesjs-storage.js",
@@ -222,7 +222,7 @@
       "package": "luna-theme",
       "version": "1.0.0",
       "source": "ours: Luna's theme for GrapesJS (light, after MUI)",
-      "sha256": "b324b9e05b26c239c67b74e72732746d71d01f083fe01c6327edc820d3d1530b"
+      "sha256": "42f97171387fef75845babf00e8347d9839f5a8ced343403ddd187db0de01934"
     },
     {
       "file": "microsoft-callback.html",

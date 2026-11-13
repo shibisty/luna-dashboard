@@ -120,7 +120,11 @@
             new ca.OneDriveProvider({ redirectUri: back(cfg.callbacks.microsoft) })
           ] });
         },
-        window.grapesjsSidebarTools,
+        // Every view (Styles, Settings, Layers, Blocks, Pages, Content,
+        // Scripts…) is a tab the user can drag to the left, right or bottom
+        // zone; the layout is remembered in localStorage. Until then all
+        // tabs are on the right, as wide as the old sidebar.
+        function (ed) { return window.grapesjsSidebarTools(ed, { sizes: { right: 320 } }); },
         window.grapesjsContextMenu.default,
         window.grapesjsExportJsx.default,
         // Web fonts from Google Fonts, Bunny, Fontsource, Fontshare; their

@@ -364,3 +364,8 @@
 .gjs-fonts { --gf-line: var(--luna-divider); --gf-soft: var(--luna-hover); }
 /* The blueprint editor keeps its dark canvas; its accent is Luna's. */
 .bpe { --bpe-accent: #1976d2; }
+
+/* ---- grapesjs-sidebar-tools 2: zones, groups, tabs, drop targets ---- */
+.gjs-st-zone { background: var(--luna-paper); }
+.gjs-st-tabs { border-bottom: 1px solid var(--luna-divider); }
+.gjs-st-drop { border-color: var(--luna-primary); background: var(--luna-primary-soft); color: var(--luna-primary); font: 500 12px/1.4 var(--luna-font); letter-spacing: .02em; }
